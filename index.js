@@ -8,9 +8,10 @@ const router = require('./util/routes');
 
 const app = express();
 
-mongoose.connect('mongodb://localhost:graphics/graphics');
+mongoose.connect('mongodb://localhost:graphics');
 
 app.use(express.static(path.join(__dirname, '../client/public')));
+app.use(bodyParser.json({ type: '*/*' }));
 app.use('/api', router);
 
 app.get('*', (req, res) => {
