@@ -4,40 +4,59 @@ module.exports = {
   get: (req, res, next) => {
     const userId = req.params.userId;
     if (userId) {
-      // logic for individual user
-      User.findOne({id: userId}, (err, foundUser) => {
+      User.findById(userId, (err, foundUser) => {
         if (err) return next(err);
-        if (foundUser) {
-          return res.json(foundUser)
-        }
-        return res.status(404).json({success: false, message: 'User not found.'})
+        if (foundUser) res.json({success: true, message: 'User found.', results: foundUser});
+        else res.status(404).json({success: false, message: 'User not found.'})
       })
-      res.json({success: true, message: `GET user: ${userId}`});
     } else {
-      // logic to get all users
-      res.json({success: true});
+      res.status(400).json({success: false, message: 'Must provide user id.'})
     }
   },
   post: (req, res, next) => {
-    const user = req.body;
-    // Create user logic
-    res.json({success: true});
+    const user = new User(req.body);
+    if (user) {
+      user.save(err => {
+        if (err) return next(err);
+        res.status(201).json({success: true, message: 'User created.', results: user});
+      });
+    }
+    else {
+      res.status(400).json({success: false, message: 'Must provide user data.'});
+    }
   },
   put: (req, res, next) => {
     const userId = req.params.userId;
+    const userData = req.body;
     if (userId) {
-      // logic for individual user
-      res.json({success: true, message: `PUT user: ${userId}`});
+      User.findByIdAndUpdate(userId, userData, (err, updatedUser) => {
+        if (err) return next(err);
+        else if (updatedUser) {
+          updatedUser = Object.assign(updatedUser, userData);
+          res.status(200).json({success: true, message: `User ${userId} updated.`, results: updatedUser});
+        }
+        else {
+          res.status(404).json({success: false, message: `User ${userId} not found.`});
+        }
+      })
     } else {
-      res.json({success: true});
+      res.status(400).json({success: false, message: 'Must provide user id.'});
     }    
   },
   delete: (req, res, next) => {
     const userId = req.params.userId
     if (userId) {
-      // logic for individual user
-      res.json({success: true, message: `DELETE user: ${userId}`});
+      User.findByIdAndRemove(userId, (err, deletedUser) => {
+        if (err) return next(user);
+        else if (deletedUser) {
+          res.status(204).json({success: true, message: `User: ${userId} deleted.`});
+        }
+        else {
+          res.status(404).json({success: false, message: `User ${userId} not found.`});
+        }
+      });
+    } else {
+      res.status(400).json({success: false, message: 'Must provide user id.'});
     }
-    res.status(422).json({success: false, message: 'Must provide user id'});
   }
 }
