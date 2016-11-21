@@ -4,8 +4,10 @@ mongoose.Promise = require('bluebird');
 const bcrypt = require('bcrypt-nodejs');
 
 const userSchema = new Schema({
-  email: { type: String, unique: true, lowercase: true, required: true },
+  username: { type: String, unique: true, lowercase: true, required: true },
+  email: {type: String, trim: true, index: true, unique: true, sparse: true, lowercase: true},
   password: { type: String, required: true, select: false  },
+  isAdmin: { type: Boolean, default: false, select: false },
   firstName: String,
   lastName: String,
   companyName: String
