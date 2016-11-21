@@ -6,13 +6,13 @@ module.exports = {
     if (userId) {
       User.findById(userId, (err, foundUser) => {
         if (err) return next(err);
-        if (foundUser) res.json({success: true, message: 'User found.', results: foundUser});
+        if (foundUser) res.status(200).json({success: true, message: 'User found.', results: foundUser});
         else res.status(404).json({success: false, message: 'User not found.'})
       })
     } else {
       User.find({})
-        .then(users => res.json(users))
-        .catch(err => res.status(500).json(err))
+        .then(users => res.status(200).json({success: true, message: 'Users found.', results: users}))
+        .catch(err => res.status(500).json({success: false, message: 'Error retreiving users', results: err}))
     }
   },
   post: (req, res, next) => {
