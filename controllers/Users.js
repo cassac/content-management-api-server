@@ -10,7 +10,9 @@ module.exports = {
         else res.status(404).json({success: false, message: 'User not found.'})
       })
     } else {
-      res.status(400).json({success: false, message: 'Must provide user id.'})
+      User.find({})
+        .then(users => res.json(users))
+        .catch(err => res.status(500).json(err))
     }
   },
   post: (req, res, next) => {
