@@ -1,10 +1,18 @@
 const UsersController = require('../controllers/users');
-const router = require('express').Router();
+const AuthController = require('../controllers/auth');
+const apiRouter = require('express').Router();
+const authRouter = require('express').Router();
 
-router.get('/users', UsersController.get);
-router.post('/users', UsersController.post);
-router.delete('/users/:userId', UsersController.delete);
-router.get('/users/:userId', UsersController.get);
-router.put('/users/:userId', UsersController.put);
+apiRouter.get('/users', UsersController.get);
+apiRouter.post('/users', UsersController.post);
+apiRouter.delete('/users/:userId', UsersController.delete);
+apiRouter.get('/users/:userId', UsersController.get);
+apiRouter.put('/users/:userId', UsersController.put);
 
-module.exports = router;
+authRouter.post('/signin', AuthController.signin);
+authRouter.post('/signup', AuthController.signup);
+
+module.exports = {
+  apiRouter,
+  authRouter
+};

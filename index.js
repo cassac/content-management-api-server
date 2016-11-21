@@ -12,7 +12,8 @@ mongoose.connect(config.dbUri);
 
 app.use(express.static(path.join(__dirname, '../client/public')));
 app.use(bodyParser.json({ type: '*/*' }));
-app.use('/api', router);
+app.use('/api', router.apiRouter);
+app.use('/auth', router.authRouter);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/public/index.html'));
