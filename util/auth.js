@@ -3,8 +3,10 @@ const secretKey = require('./config').secretKey;
 const User = require('../models/users');
 
 module.exports = {
-  grantUserToken: (user) => {
+  grantUserToken: (user, isAdmin) => {
+    isAdmin = isAdmin === true ? true : false;
     const timestamp = new Date.getTime();
-    return jwt.encode({userId: user._id}, secretKey);
-  }
+    const data = {sub: user._id, admin: isAdmin, iat: timestamp};
+    return jwt.encode(data, secretKey);
+  },
 }
