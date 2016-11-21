@@ -34,10 +34,19 @@ describe('User Model and API', () => {
         });
     });
 
-    it('User should require email and password', () => {
-      user = new User()
+    it('User should require email and password', (done) => {
+      user = new User({})
         .save(err => {
-          expect(err).should.have.property('ValidationError');
+          err.name.should.equal('ValidationError');
+          done();
+        });
+    });
+
+    it('User email field should be unique', (done) => {
+      user = new User(fakeUser1)
+        .save(err => {
+          expect(err.toJSON().errmsg).to.contain('duplicate key error');
+          done();
         });
     });
 
