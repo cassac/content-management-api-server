@@ -5,8 +5,8 @@ const assert = chai.assert;
 const expect = chai.expect;  
 const should = chai.should();
 
-const app = require('../index.js');
-const User = require('../models/Users.js');
+const app = require('../index');
+const User = require('../models/users');
 
 const fakeUser1 = {email: 'abcdefg@123.com', password: '123'};
 const fakeUser2 = {email: 'efg@123.com', password: '123'};
@@ -67,20 +67,20 @@ describe('User Model and API', () => {
       User.findOne({})
         .then(oneUser => {
           user = oneUser;
-          done()
-        })
-    })
+          done();
+        });
+    });
 
     it('"/user" GET should return all users - 2 users', (done) => {
       request(app)
         .get('/api/users')
         .end((err, res) => {
-          res.body.should.have.length(2);
+          res.body.results.should.have.length(2);
           done();
         })
     });
 
-    it('"/user/:userId GET should return one user object without password a property', (done) => {
+    it('"/user/:userId" GET should return one user object without password a property', (done) => {
       request(app)
         .get(`/api/users/${user._id}`)
         .end((err, res) => {
@@ -89,6 +89,13 @@ describe('User Model and API', () => {
           done();
         });
     });
+
+    /*
+    TODO
+    /users POST
+    /users/:userId PUT
+    /users/:userId DELETE
+    */
 
   }); // end User API
   
