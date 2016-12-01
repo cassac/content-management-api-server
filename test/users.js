@@ -24,42 +24,42 @@ describe('User Model and API', () => {
     User.remove({}, () => done() );  
   });
 
-  describe('User Model', () => {
+  // describe('User Model', () => {
 
-    it('User collection should have two users', (done) => {
-      User.find({})
-        .then(users => {
-          users.should.have.length(3);
-          done();
-        });
-    });
+  //   it('User collection should have two users', (done) => {
+  //     User.find({})
+  //       .then(users => {
+  //         users.should.have.length(3);
+  //         done();
+  //       });
+  //   });
 
-    it('User should require username and password', (done) => {
-      user = new User({})
-        .save(err => {
-          err.name.should.equal('ValidationError');
-          done();
-        });
-    });
+  //   it('User should require username and password', (done) => {
+  //     user = new User({})
+  //       .save(err => {
+  //         err.name.should.equal('ValidationError');
+  //         done();
+  //       });
+  //   });
 
-    it('User username field should be unique', (done) => {
-      user = new User(fakeUser1)
-        .save(err => {
-          expect(err.toJSON().errmsg).to.contain('duplicate key error');
-          done();
-        });
-    });
+  //   it('User username field should be unique', (done) => {
+  //     user = new User(fakeUser1)
+  //       .save(err => {
+  //         expect(err.toJSON().errmsg).to.contain('duplicate key error');
+  //         done();
+  //       });
+  //   });
 
-    it('User should encrypt password on save', (done) => {
-      User.findOne({}).select('+password').exec((err, user) => {
-        user.password.should.not.equal('123')
-        done();
-      });
-    });
+  //   it('User should encrypt password on save', (done) => {
+  //     User.findOne({}).select('+password').exec((err, user) => {
+  //       user.password.should.not.equal('123')
+  //       done();
+  //     });
+  //   });
 
-  }); // end User Model
+  // }); // end User Model
 
-  describe('User API', () => {
+  describe('User API Endpoints', () => {
 
     let user;
 
@@ -71,24 +71,63 @@ describe('User Model and API', () => {
         });
     });
 
-    it('"/user" GET should return 401 Unauthorized', (done) => {
-      request(app)
-        .get('/api/users')
-        .end((err, res) => {
-          res.status.should.equal(401);
-          res.text.should.equal('Unauthorized');
-          done();
-        })
-    });
+    describe('Unauthenticated user access', () => {
 
-    it('"/user/:userId" GET should return 401 Unauthorized', (done) => {
-      request(app)
-        .get(`/api/users/${user._id}`)
-        .end((err, res) => {
-          res.status.should.equal(401);
-          res.text.should.equal('Unauthorized');
-          done();
-        });
+      it('"/user" GET should return 401 Unauthorized', (done) => {
+        request(app)
+          .get('/api/users')
+          .end((err, res) => {
+            res.status.should.equal(401);
+            res.text.should.equal('Unauthorized');
+            done();
+          })
+      });
+
+      it('"/user" POST should return 401 Unauthorized', (done) => {
+        request(app)
+          .post(`/api/users`, {
+            username: 'user3',
+            password: '123'
+          })
+          .end((err, res) => {
+            res.status.should.equal(401);
+            res.text.should.equal('Unauthorized');
+            done();
+          });
+      });
+
+      it('"/user/:userId" GET should return 401 Unauthorized', (done) => {
+        request(app)
+          .get(`/api/users/${user._id}`)
+          .end((err, res) => {
+            res.status.should.equal(401);
+            res.text.should.equal('Unauthorized');
+            done();
+          });
+      });
+
+      it('"/user/:userId" PUT should return 401 Unauthorized', (done) => {
+        request(app)
+          .put(`/api/users/${user._id}`, {
+            username: 'newusername'
+          })
+          .end((err, res) => {
+            res.status.should.equal(401);
+            res.text.should.equal('Unauthorized');
+            done();
+          });
+      });
+
+      it('"/user/:userId" DELETE should return 401 Unauthorized', (done) => {
+        request(app)
+          .delete(`/api/users/${user._id}`)
+          .end((err, res) => {
+            res.status.should.equal(401);
+            res.text.should.equal('Unauthorized');
+            done();
+          });
+      });
+
     });
 
     /*
@@ -100,6 +139,8 @@ describe('User Model and API', () => {
     /users POST
     /users/:userId PUT
     /users/:userId DELETE
+    /auth/signin
+    /auth/signup
     */
 
   }); // end User API
