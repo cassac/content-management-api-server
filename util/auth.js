@@ -14,5 +14,14 @@ module.exports = {
       return res.status(403).json({success: false, message: 'Unauthorized.', results: [] });
     }
     return next();
+  },
+  requireUserOrAdmin: (req, res, next) => {
+    const requestingUser = jwt.decode(req.headers.authorization, secretKey);
+    const targetUser = req.params.userId;
+    // Reject if requesting user is not an admin or requesting user is not target user
+    if (!requestingUser.isAdmin && (requestingUser.sub !== targetUser)) {
+      return res.status(403).json({success: false, message: 'Unauthorized.', results: [] });
+    }
+    return next();
   }
 }
