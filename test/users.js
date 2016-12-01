@@ -8,16 +8,16 @@ const should = chai.should();
 const app = require('../index');
 const User = require('../models/users');
 
+const fakeAdmin = {username: 'admin', password: '123', isAdmin: true};
 const fakeUser1 = {username: 'user1', password: '123'};
 const fakeUser2 = {username: 'user2', password: '123'};
 
 describe('User Model and API', () => {
 
-  before(done => {    
-    const user1 = new User(fakeUser1);
-    const user2 = new User(fakeUser2);
-    user1.save();
-    user2.save(() => done() );    
+  before(done => {
+    User.create([fakeAdmin, fakeUser1, fakeUser2], () => {
+      done();
+    })   
   });  
 
   after(done => {    
@@ -29,7 +29,7 @@ describe('User Model and API', () => {
     it('User collection should have two users', (done) => {
       User.find({})
         .then(users => {
-          users.should.have.length(2);
+          users.should.have.length(3);
           done();
         });
     });
@@ -71,27 +71,32 @@ describe('User Model and API', () => {
         });
     });
 
-    it('"/user" GET should return all users - 2 users', (done) => {
+    it('"/user" GET should return 401 Unauthorized', (done) => {
       request(app)
         .get('/api/users')
         .end((err, res) => {
-          res.body.results.should.have.length(2);
+          res.status.should.equal(401);
+          res.text.should.equal('Unauthorized');
           done();
         })
     });
 
-    it('"/user/:userId" GET should return one user object without password a property', (done) => {
+    it('"/user/:userId" GET should return 401 Unauthorized', (done) => {
       request(app)
         .get(`/api/users/${user._id}`)
         .end((err, res) => {
-          assert.equal(res.body.results._id, user._id);
-          expect(res.body.results).should.not.property('password');
+          res.status.should.equal(401);
+          res.text.should.equal('Unauthorized');
           done();
         });
     });
 
     /*
     TODO
+    /users GET - should return 2 users
+    /users/:userId GET - should return one user object without password a property 
+      assert.equal(res.body.results._id, user._id);
+      expect(res.body.results).should.not.property('password');
     /users POST
     /users/:userId PUT
     /users/:userId DELETE
