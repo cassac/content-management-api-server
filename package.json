@@ -1,7 +1,7 @@
 {
-  "name": "graphics-server",
+  "name": "express-server",
   "version": "1.0.0",
-  "description": "",
+  "description": "An express server with api endpoints, authentication, users and file uploads",
   "main": "index.js",
   "scripts": {
     "test": "mocha test",
