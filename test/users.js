@@ -8,8 +8,8 @@ const should = chai.should();
 const app = require('../index');
 const User = require('../models/users');
 
-const fakeUser1 = {email: 'abcdefg@123.com', password: '123'};
-const fakeUser2 = {email: 'efg@123.com', password: '123'};
+const fakeUser1 = {username: 'user1', password: '123'};
+const fakeUser2 = {username: 'user2', password: '123'};
 
 describe('User Model and API', () => {
 
@@ -34,7 +34,7 @@ describe('User Model and API', () => {
         });
     });
 
-    it('User should require email and password', (done) => {
+    it('User should require username and password', (done) => {
       user = new User({})
         .save(err => {
           err.name.should.equal('ValidationError');
@@ -42,7 +42,7 @@ describe('User Model and API', () => {
         });
     });
 
-    it('User email field should be unique', (done) => {
+    it('User username field should be unique', (done) => {
       user = new User(fakeUser1)
         .save(err => {
           expect(err.toJSON().errmsg).to.contain('duplicate key error');
