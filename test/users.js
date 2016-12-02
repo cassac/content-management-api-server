@@ -64,10 +64,11 @@ describe('User Model and API', () => {
 
     let admin, adminToken;
     let user, userToken;
-    let targetUser;
+    let targetUser1;
+    let targetUser2;
 
     before(done => {
-      User.find({})
+      User.find({}).select('+isAdmin').exec()
         .then(users => {
           admin = users[0];
           adminToken = util.grantUserToken(admin);
@@ -79,7 +80,7 @@ describe('User Model and API', () => {
           return users;
         })
         .then((users) => {
-          targetUser = users[2];
+          targetUser1 = users[2];
         })
         .then(done);
     });
@@ -111,7 +112,7 @@ describe('User Model and API', () => {
 
       it('"/user/:userId" GET should return 401 Unauthorized', (done) => {
         request(app)
-          .get(`/api/users/${targetUser._id}`)
+          .get(`/api/users/${targetUser1._id}`)
           .end((err, res) => {
             res.status.should.equal(401);
             res.text.should.equal('Unauthorized');
@@ -121,7 +122,7 @@ describe('User Model and API', () => {
 
       it('"/user/:userId" PUT should return 401 Unauthorized', (done) => {
         request(app)
-          .put(`/api/users/${targetUser._id}`, {
+          .put(`/api/users/${targetUser1._id}`, {
             username: 'newusername'
           })
           .end((err, res) => {
@@ -133,7 +134,7 @@ describe('User Model and API', () => {
 
       it('"/user/:userId" DELETE should return 401 Unauthorized', (done) => {
         request(app)
-          .delete(`/api/users/${targetUser._id}`)
+          .delete(`/api/users/${targetUser1._id}`)
           .end((err, res) => {
             res.status.should.equal(401);
             res.text.should.equal('Unauthorized');
@@ -170,7 +171,7 @@ describe('User Model and API', () => {
 
       it('"/user/:userId" GET should return 403 Forbidden', (done) => {
         request(app)
-          .get(`/api/users/${targetUser._id}`)
+          .get(`/api/users/${targetUser1._id}`)
           .set('authorization', userToken)
           .end((err, res) => {
             res.status.should.equal(403);
@@ -181,7 +182,7 @@ describe('User Model and API', () => {
 
       it('"/user/:userId" PUT should return 403 Forbidden', (done) => {
         request(app)
-          .put(`/api/users/${targetUser._id}`)
+          .put(`/api/users/${targetUser1._id}`)
           .set('authorization', userToken)
           .send({username: 'newusername'})
           .end((err, res) => {
@@ -193,7 +194,7 @@ describe('User Model and API', () => {
 
       it('"/user/:userId" DELETE should return 403 Forbidden', (done) => {
         request(app)
-          .delete(`/api/users/${targetUser._id}`)
+          .delete(`/api/users/${targetUser1._id}`)
           .set('authorization', userToken)
           .end((err, res) => {
             res.status.should.equal(403);
@@ -243,23 +244,73 @@ describe('User Model and API', () => {
     });
 
     describe('Authenticated user - is admin (full access)', () => {
-      // left off here
-    })
 
+      it('"/user" GET should return 3 users', (done) => {
+        request(app)
+          .get('/api/users')
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            res.status.should.equal(200);
+            res.body.results.should.have.length(3);
+            done();
+          })
+      });
+
+      it('"/user" POST should return 201 and new user data w/o password', (done) => {
+        request(app)
+          .post(`/api/users`)
+          .set('authorization', adminToken)
+          .send({username: 'user3', password: '123'})
+          .end((err, res) => {
+            targetUser2 = res.body.results;
+            res.status.should.equal(201);
+            res.body.results.username.should.equal('user3');
+            expect(res.body.results).should.not.property('password');
+            done();
+          });
+      });
+
+      it('"/user/:userId" DELETE should return 204', (done) => {
+        request(app)
+          .delete(`/api/users/${targetUser2._id}`)
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            res.status.should.equal(204);
+            done();
+          });
+      }); 
+
+      it('"/user/:userId" GET deleted user should return 404 "User not found." ', (done) => {
+        request(app)
+          .get(`/api/users/${targetUser2._id}`)
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            res.status.should.equal(404);
+            res.body.message.should.equal('User not found.');
+            done();
+          });
+      });
+
+      it('"/user/:userId" PUT should return 200 and updated user data', (done) => {
+        request(app)
+          .put(`/api/users/${user._id}`)
+          .set('authorization', adminToken)
+          .send({username: 'anothernewusername'})
+          .end((err, res) => {
+            res.status.should.equal(200);
+            res.body.results.username.should.equal('anothernewusername');
+            done();
+          });
+      });  
+
+    });
 
     /*
     TODO
-    /users GET - should return 2 users
-    /users/:userId GET - should return one user object without password a property 
-      assert.equal(res.body.results._id, user._id);
-      expect(res.body.results).should.not.property('password');
-    /users POST
-    /users/:userId PUT
-    /users/:userId DELETE
     /auth/signin
     /auth/signup
     */
 
   }); // end User API
   
-})
+});
