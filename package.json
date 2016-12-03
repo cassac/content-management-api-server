@@ -1,5 +1,5 @@
 {
-  "name": "express-server",
+  "name": "file-management-server",
   "version": "1.0.0",
   "description": "An express server with api endpoints, authentication, users and file uploads",
   "main": "index.js",
