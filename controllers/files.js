@@ -1,16 +1,28 @@
 const File = require('../models/files');
 
 module.exports = {
-  get: (req, res, next) => {
+  userFiles: {
+    get: (req, res, next) => {
+      
+    },
+    post: (req, res, next) => {
 
+    },
   },
-  post: (req, res, next) => {
+  singleFile: {
+    get: (req, res, next) => {
 
+    },
+    put: (req, res, next) => {
+
+    },
+    delete: (req, res, next) => {
+
+    },    
   },
-  put: (req, res, next) => {
+  allFiles: {
+    get: (req, res, next) => {
 
-  },
-  delete: (req, res, next) => {
-
+    },
   },
 }
