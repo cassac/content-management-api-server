@@ -46,7 +46,7 @@ module.exports = {
     }    
   },
   delete: (req, res, next) => {
-    const userId = req.params.userId
+    const userId = req.params.userId;
     if (userId) {
       User.findByIdAndRemove(userId, (err, deletedUser) => {
         if (err) return next(user);

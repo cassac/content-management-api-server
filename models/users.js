@@ -33,7 +33,7 @@ userSchema.methods.comparePassword = function(providedPassword, cb) {
   bcrypt.compare(providedPassword, this.password, function(err, isMatch) {
     if (err) return cb(err);
     return cb(null, isMatch);
-  })
+  });
 }
 
 const UserModel = mongoose.model('user', userSchema);

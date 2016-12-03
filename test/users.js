@@ -309,7 +309,6 @@ describe('User Model and API', () => {
   
   describe('Auth API endpoints', () => {
 
-
     describe('Signup endpoint "/auth/signup" POST', () => {
 
       it('should require all user data', (done) => {
