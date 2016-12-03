@@ -305,12 +305,42 @@ describe('User Model and API', () => {
 
     });
 
-    /*
-    TODO
-    /auth/signin
-    /auth/signup
-    */
-
   }); // end User API
   
+  describe('Auth API endpoints', () => {
+
+    describe('Signin endpoint "/auth/signin" POST', () => {
+      
+      it('should require username and password', () => {
+
+      });
+
+      it('should reject invalid username and password', () => {
+
+      });
+
+      it('should return token on successful login', () => {
+
+      });
+
+    });
+
+    describe('Signup endpoint "/auth/signup" POST', () => {
+
+      it('should require all user data', () => {
+
+      });
+
+      it('should prevent duplicate registration of usernames', () => {
+
+      });
+
+      it('should return token on succesful signup', () => {
+
+      });
+
+    });
+
+  }); // end Auth API endpoints
+
 });
