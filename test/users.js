@@ -309,6 +309,45 @@ describe('User Model and API', () => {
   
   describe('Auth API endpoints', () => {
 
+
+    describe('Signup endpoint "/auth/signup" POST', () => {
+
+      it('should require all user data', (done) => {
+        request(app)
+          .post(`/auth/signup`)
+          .send({username: 'myusername', password: ''})
+          .end((err, res) => {
+            res.status.should.equal(400);
+            res.body.message.should.equal('Signup requires username and password.');
+            done();
+          });
+      });
+
+      it('should prevent duplicate registration of usernames', (done) => {
+        request(app)
+          .post(`/auth/signup`)
+          .send(fakeUser2)
+          .end((err, res) => {
+            res.status.should.equal(422);
+            res.body.message.should.equal('Username already registered.');
+            done();
+          });
+      });
+
+      it('should return token on succesful signup', (done) => {
+        request(app)
+          .post(`/auth/signup`)
+          .send({username: 'uniqueuser', password: '123'})
+          .end((err, res) => {
+            res.status.should.equal(201);
+            res.body.message.should.equal('User created.');
+            res.body.token.should.exist;
+            done();
+          });
+      });
+
+    });
+
     describe('Signin endpoint "/auth/signin" POST', () => {
       
       it('should require username and password', () => {
@@ -320,22 +359,6 @@ describe('User Model and API', () => {
       });
 
       it('should return token on successful login', () => {
-
-      });
-
-    });
-
-    describe('Signup endpoint "/auth/signup" POST', () => {
-
-      it('should require all user data', () => {
-
-      });
-
-      it('should prevent duplicate registration of usernames', () => {
-
-      });
-
-      it('should return token on succesful signup', () => {
 
       });
 
