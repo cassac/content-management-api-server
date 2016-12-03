@@ -350,16 +350,40 @@ describe('User Model and API', () => {
 
     describe('Signin endpoint "/auth/signin" POST', () => {
       
-      it('should require username and password', () => {
-
+      it('should require username and password', (done) => {
+        request(app)
+          .post(`/auth/signin`)
+          .send({username: 'user', password: ''})
+          .end((err, res) => {
+            res.status.should.equal(400);
+            assert.equal(res.body.token, undefined);
+            res.body.message.should.equal('Must provide username and password.');
+            done();
+          });
       });
 
-      it('should reject invalid username and password', () => {
-
+      it('should reject invalid username and password', (done) => {
+        request(app)
+          .post(`/auth/signin`)
+          .send({username: 'user2', password: 'abc'})
+          .end((err, res) => {
+            res.status.should.equal(400);
+            assert.equal(res.body.token, undefined);
+            res.body.message.should.equal('Incorrect username and/or password');
+            done();
+          });
       });
 
-      it('should return token on successful login', () => {
-
+      it('should return token on successful login', (done) => {
+        request(app)
+          .post(`/auth/signin`)
+          .send({username: 'user2', password: '123'})
+          .end((err, res) => {
+            res.status.should.equal(200);
+            res.body.message.should.equal('Successful login.');
+            res.body.token.should.exist;
+            done();
+          });
       });
 
     });
