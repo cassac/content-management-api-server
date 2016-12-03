@@ -16,9 +16,13 @@ apiRouter.delete('/users/:userId', requireAuth, requireAdmin, UsersController.de
 apiRouter.get('/users/:userId', requireAuth, requireUserOrAdmin, UsersController.get);
 apiRouter.put('/users/:userId', requireAuth, requireUserOrAdmin, UsersController.put);
 
-apiRouter.get('/users/files', requireAuth, requireAdmin, FilesController.get);
-apiRouter.get('/users/:userId/files', requireAuth, requireUserOrAdmin, FilesController.get);
-apiRouter.get('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.get);
+apiRouter.get('/users/:userId/files', requireAuth, requireUserOrAdmin, FilesController.userFiles.get);
+apiRouter.post('/users/:userId/files', requireAuth, requireUserOrAdmin, FilesController.userFiles.post);
+
+apiRouter.get('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.singleFile.get);
+apiRouter.put('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.singleFile.put);
+apiRouter.delete('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.singleFile.delete);
+apiRouter.get('/files', requireAuth, requireAdmin, FilesController.allFiles.get);
 
 authRouter.post('/signin', AuthController.signin);
 authRouter.post('/signup', AuthController.signup);
