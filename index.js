@@ -17,10 +17,10 @@ app.use('/auth', router.authRouter);
 
 app.get('*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/public/index.html'));
-})
+});
 
 app.listen(config.port, () => {
-  console.log(`App running on port ${config.port}`)
-})
+  console.log(`App running on port ${config.port}`);
+});
 
 module.exports = app;
