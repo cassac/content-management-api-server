@@ -4,8 +4,8 @@ module.exports = {
   secretKey: 'this needs to be more secret',
   port: process.env.PORT || 3000,
   dbUri: process.env.TESTING ? 
-    'mongodb://localhost:db/graphics_testing' :
-    'mongodb://localhost:db/graphics',
+    'mongodb://localhost:db/fileServer_testing' :
+    'mongodb://localhost:db/fileServer',
   uploadPath: (filename) => {
     const date = new Date();
     return path.join(
