@@ -4,25 +4,24 @@ const fsPath = require('fs-path');
 const fs = Promise.promisifyAll(require('fs'));
 const multiparty = require('multiparty');
 const File = require('../models/files');
-const uploadDir = require('../util/config').uploadDir;
+const config = require('../util/config');
 
 module.exports = {
   userFiles: {
     get: (req, res, next) => {
       const { userId } = req.params;
-      console.log('userId:', userId)
-      File.findById(userId, (err, files) => {
+      File.find({ownerId: userId}, (err, files) => {
         if (err) return next(err);
         res.status(200).json({success: true, message: 'User files retrieved.', results: files});
       });
-    },
+    }, // end userFiles GET
     post: (req, res, next) => {
       const { userId } = req.params;
       const form = new multiparty.Form();
       let count = 0;
 
       form.on('error', (err) => {
-        console.log('Error parsing form: ' + err.stack);
+        res.status(400).json({success: false, message: `Form parse error: ${err.stack}`});
       });
 
       let comment;
@@ -34,15 +33,30 @@ module.exports = {
       form.on('file', (name, file) => {
         const { originalFilename, path, size } = file;
         const contentType = file.headers['content-type'];
+        const filePath = config.uploadPath(originalFilename);
+        const fileExt = originalFilename.split('.').pop();
+
+        if (!config.allowedFileTypes.includes(fileExt)) {
+          return res.status(400).json({success: false, message: `File type .${fileExt} not allowed.`, results: []});
+        }
 
         fs.readFileAsync(path, contents => contents)
           .then(contents => {
-            fsPath.writeFile(uploadDir(originalFilename), contents, (err) => {
-              count++;
-              console.log('success')
+            fsPath.writeFile(pathModule.join(config.uploadDir, filePath), contents, (err) => {
+              if (err) res.status(500).json({success: false, message: `Write file error: ${err.message}`, results: [] });
+              const userFile = new File({
+                ownerId: userId,
+                contentType,
+                filePath,
+                fileSize: size,
+                comment
+              });
+              userFile.save()
+                .then(() => { count++; })
+                .catch(err => console.log(`Save file err: ${err.message}`));
             });
           })
-          .catch(err => console.log('read err:', err))
+          .catch(err => console.log(`File read err: ${err.message}`));
 
       });
        
@@ -52,7 +66,7 @@ module.exports = {
 
       form.parse(req);
 
-    },
+    }, // end userFiles POST
   },
   singleFile: {
     get: (req, res, next) => {
