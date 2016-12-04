@@ -4,9 +4,10 @@ mongoose.Promise = require('bluebird');
 
 const fileSchema = new Schema({
   ownerId: { type: String, required: true },
-  fileName: { type: String, required: true }, 
-  fileType: { type: String, required: true },
+  contentType: { type: String, required: true },
   filePath: { type: String, required: true },
+  fileSize: { type: Number, required: true },
+  comment: String,
 });
 
 const FileModel = mongoose.model('file', fileSchema);
