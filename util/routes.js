@@ -4,25 +4,31 @@ const AuthController = require('../controllers/auth');
 const apiRouter = require('express').Router();
 const authRouter = require('express').Router();
 
+const bodyParser = require('body-parser');
+const jsonParser = bodyParser.json({ type: '*/*' });
 const passport = require('passport');
 const passportService = require('../services/passport');
 
 const { requireUserOrAdmin, requireAdmin } = require('./auth');
 const requireAuth = passport.authenticate('jwt', { session: false });
 
-apiRouter.get('/users', requireAuth, requireAdmin, UsersController.get);
-apiRouter.post('/users', requireAuth, requireAdmin, UsersController.post);
-apiRouter.delete('/users/:userId', requireAuth, requireAdmin, UsersController.delete);
-apiRouter.get('/users/:userId', requireAuth, requireUserOrAdmin, UsersController.get);
-apiRouter.put('/users/:userId', requireAuth, requireUserOrAdmin, UsersController.put);
+const adminOnly = [requireAuth, requireAdmin, jsonParser];
+const userOrAdmin = [requireAuth, requireUserOrAdmin, jsonParser];
 
-apiRouter.get('/users/:userId/files', requireAuth, requireUserOrAdmin, FilesController.userFiles.get);
+apiRouter.get('/users', adminOnly, UsersController.get);
+apiRouter.post('/users', adminOnly, UsersController.post);
+apiRouter.delete('/users/:userId', adminOnly, UsersController.delete);
+apiRouter.get('/users/:userId', userOrAdmin, UsersController.get);
+apiRouter.put('/users/:userId', userOrAdmin, UsersController.put);
+
+apiRouter.get('/users/:userId/files', userOrAdmin, FilesController.userFiles.get);
+// POSTing files need to use multiparty middleware instead of bodyParser
 apiRouter.post('/users/:userId/files', requireAuth, requireUserOrAdmin, FilesController.userFiles.post);
 
-apiRouter.get('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.singleFile.get);
-apiRouter.put('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.singleFile.put);
-apiRouter.delete('/files/:fileId', requireAuth, requireUserOrAdmin, FilesController.singleFile.delete);
-apiRouter.get('/files', requireAuth, requireAdmin, FilesController.allFiles.get);
+apiRouter.get('/files/:fileId', userOrAdmin, FilesController.singleFile.get);
+apiRouter.put('/files/:fileId', userOrAdmin, FilesController.singleFile.put);
+apiRouter.delete('/files/:fileId', userOrAdmin, FilesController.singleFile.delete);
+apiRouter.get('/files', adminOnly, FilesController.allFiles.get);
 
 authRouter.post('/signin', AuthController.signin);
 authRouter.post('/signup', AuthController.signup);
