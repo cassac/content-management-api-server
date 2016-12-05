@@ -18,10 +18,9 @@ module.exports = {
     post: (req, res, next) => {
       const { userId } = req.params;
       const form = new multiparty.Form();
-      let count = 0;
 
       form.on('error', (err) => {
-        res.status(400).json({success: false, message: `Form parse error: ${err.stack}`});
+        res.status(400).json({success: false, message: `${err.stack}`});
       });
 
       let comment;
@@ -38,13 +37,13 @@ module.exports = {
 
         // File type must be in allowedFileTypes and must have an extension
         if (!config.allowedFileTypes.includes(fileExt) || fileExt.length <= 1) {
-          return res.status(400).json({success: false, message: `File type .${fileExt} not allowed.`, results: []});
+          form.emit('error', {stack: `File type .${fileExt} not allowed.`})
         }
 
         fs.readFileAsync(path, contents => contents)
           .then(contents => {
             fsPath.writeFile(pathModule.join(config.uploadDir, filePath), contents, (err) => {
-              if (err) return res.status(500).json({success: false, message: `Write file error: ${err.message}`, results: [] });
+              if (err) return form.emit('error', {stack: `Write file error: ${err.message}` });
               const userFile = new File({
                 ownerId: userId,
                 contentType,
@@ -53,8 +52,7 @@ module.exports = {
                 comment
               });
               userFile.save()
-                .then(() => { count++; })
-                .catch(err => console.log(`Save file err: ${err.message}`));
+                .catch(err => form.emit('error', {stack: `Save file err: ${err.message}` }));
             });
           })
           .catch(err => console.log(`File read err: ${err.message}`));
@@ -62,7 +60,7 @@ module.exports = {
       });
        
       form.on('close', () => {
-        res.status(201).json({success: true, message: 'Files uploading...', results: [] });
+        res.status(202).json({success: true, message: 'Files uploading...', results: [] });
       });
 
       form.parse(req);
