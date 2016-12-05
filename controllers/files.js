@@ -34,16 +34,17 @@ module.exports = {
         const { originalFilename, path, size } = file;
         const contentType = file.headers['content-type'];
         const filePath = config.uploadPath(originalFilename);
-        const fileExt = originalFilename.split('.').pop();
+        const fileExt = originalFilename.split('.').pop().toLowerCase();
 
-        if (!config.allowedFileTypes.includes(fileExt)) {
+        // File type must be in allowedFileTypes and must have an extension
+        if (!config.allowedFileTypes.includes(fileExt) || fileExt.length <= 1) {
           return res.status(400).json({success: false, message: `File type .${fileExt} not allowed.`, results: []});
         }
 
         fs.readFileAsync(path, contents => contents)
           .then(contents => {
             fsPath.writeFile(pathModule.join(config.uploadDir, filePath), contents, (err) => {
-              if (err) res.status(500).json({success: false, message: `Write file error: ${err.message}`, results: [] });
+              if (err) return res.status(500).json({success: false, message: `Write file error: ${err.message}`, results: [] });
               const userFile = new File({
                 ownerId: userId,
                 contentType,
