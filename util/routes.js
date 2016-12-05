@@ -30,8 +30,8 @@ apiRouter.put('/files/:fileId', userOrAdmin, FilesController.singleFile.put);
 apiRouter.delete('/files/:fileId', userOrAdmin, FilesController.singleFile.delete);
 apiRouter.get('/files', adminOnly, FilesController.allFiles.get);
 
-authRouter.post('/signin', AuthController.signin);
-authRouter.post('/signup', AuthController.signup);
+authRouter.post('/signin', jsonParser, AuthController.signin);
+authRouter.post('/signup', jsonParser, AuthController.signup);
 
 module.exports = {
   apiRouter,
