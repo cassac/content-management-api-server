@@ -18,32 +18,32 @@ module.exports = {
     post: (req, res, next) => {
       const { userId } = req.params;
       const form = new multiparty.Form();
-
-      form.on('error', (err) => {
-        res.status(400).json({success: false, message: `${err.stack}`});
-      });
-
-      let comment;
-
-      form.on('field', (name, value) => {
-        comment = value;
-      })
-
-      form.on('file', (name, file) => {
+      form.parse(req, function(err, fields, files) {
+        if (!fields.comment || !files.file) {
+          return res.status(400).json({success: false, message: 'Comment and file field required in request.', results: []});
+        } 
+        else if (!files.file.length) {
+          return res.status(400).json({success: false, message: 'No file submitted in request.', results: []});
+        }
+        else if (files.file.length > 1) {
+          return res.status(400).json({success: false, message: 'Only one file per request.', results: []});
+        }
+        const comment = fields.comment;
+        const file = files.file[0];
         const { originalFilename, path, size } = file;
         const contentType = file.headers['content-type'];
         const filePath = config.uploadPath(originalFilename);
         const fileExt = originalFilename.split('.').pop().toLowerCase();
-
-        // File type must be in allowedFileTypes and must have an extension
+        // // File type must be in allowedFileTypes and must have an extension
         if (!config.allowedFileTypes.includes(fileExt) || fileExt.length <= 1) {
-          form.emit('error', {stack: `File type .${fileExt} not allowed.`})
+          return res.json({success: false, message: `File type .${fileExt} not allowed.`, results: []})
         }
-
         fs.readFileAsync(path, contents => contents)
           .then(contents => {
             fsPath.writeFile(pathModule.join(config.uploadDir, filePath), contents, (err) => {
-              if (err) return form.emit('error', {stack: `Write file error: ${err.message}` });
+              if (err) {
+                return res.status(500).json({success: false, message: `Write file error: ${err.message}`, results: [] });
+              }
               const userFile = new File({
                 ownerId: userId,
                 contentType,
@@ -52,19 +52,18 @@ module.exports = {
                 comment
               });
               userFile.save()
-                .catch(err => form.emit('error', {stack: `Save file err: ${err.message}` }));
+                .then((newFile) => {
+                  return res.status(201).json({success: true, message: `File uploaded successfully.`, results: [newFile] });
+                })
+                .catch(err => {
+                  return res.status(500).json({success: false, message: `Save file error: ${err.message}`, results: [] });
+                });
             });
           })
-          .catch(err => console.log(`File read err: ${err.message}`));
-
-      });
-       
-      form.on('close', () => {
-        res.status(202).json({success: true, message: 'Files uploading...', results: [] });
-      });
-
-      form.parse(req);
-
+          .catch(err => {
+            return res.status(500).json({success: false, message: `File read error: ${err.message}`, results: [] });
+          });
+      }); // end form.parse
     }, // end userFiles POST
   },
   singleFile: {
