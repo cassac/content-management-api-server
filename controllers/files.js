@@ -10,10 +10,17 @@ module.exports = {
   userFiles: {
     get: (req, res, next) => {
       const { userId } = req.params;
-      File.find({ownerId: userId}, (err, files) => {
-        if (err) return next(err);
-        res.status(200).json({success: true, message: 'User files retrieved.', results: files});
-      });
+      // TODO implement pagination. need to extend File model
+      File.find({ownerId: userId})
+        .then(files => {
+          if (!files) {
+            return res.status(200).json({success: true, message: 'User has no files.', results: []});
+          }
+          return res.status(200).json({success: true, message: 'User files retrieved.', results: files});
+        })
+        .catch(err => {
+            return res.status(500).json({success: false, message: `Error retrieving files ${err.message}`, results: []});
+        });
     }, // end userFiles GET
     post: (req, res, next) => {
       const { userId } = req.params;
@@ -36,7 +43,7 @@ module.exports = {
         const fileExt = originalFilename.split('.').pop().toLowerCase();
         // File type must be in allowedFileTypes and must have an extension
         if (!config.allowedFileTypes.includes(fileExt) || fileExt.length <= 1) {
-          return res.json({success: false, message: `File type .${fileExt} not allowed.`, results: []});
+          return res.json({success: false, message: `File type .${fileExt} not allowed.`, results: {}});
         }
         if (size > config.maxFileSize) {
           return res.json({success: false, message: `File size may not exceed ${config.maxFileSize / 100000} MB.`, results: {}});
@@ -75,12 +82,12 @@ module.exports = {
       File.findById(fileId)
         .then(file => {
           if (!file) {
-            return res.status(404).json({success: false, message: `File not found. (${fileId})`});
+            return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`});
           }
           return res.status(200).json({success: true, message: 'File found.', results: file});
         })
         .catch(err => {
-          return res.status(500).json({success: false, message: 'Error retreiving file', results: {}});
+          return res.status(500).json({success: false, message: 'Error retrieving file', results: {}});
         });
     },
     put: (req, res, next) => {
@@ -89,7 +96,7 @@ module.exports = {
       File.findByIdAndUpdate(fileId, {comment})
         .then(file => {
           if (!file) {
-            return res.status(404).json({success: false, message: `File not found. (${fileId})`});
+            return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`});
           }
           file = Object.assign(file, {comment});
           return res.status(200).json({success: true, message: 'File updated.', results: file});
@@ -99,12 +106,26 @@ module.exports = {
         })
     },
     delete: (req, res, next) => {
-
+      const { fileId } = req.params;
+      File.findByIdAndRemove(fileId)
+        .then(() => {
+          return res.status(200).json({success: true, message: 'File deleted.', results: {}});          
+        })
+        .catch(err => {
+          return res.status(500).json({success: false, message: `Error deleting file. (ID: ${fileId})`, results: {}});          
+        })
     },    
   },
   allFiles: {
     get: (req, res, next) => {
-
+      // TODO implement pagination. need to extend File model with date field
+      File.find({})
+        .then(files => {
+          return res.status(200).json({success: true, message: 'Files retrieved.', results: files});
+        })
+        .catch(err => {
+          return res.status(500).json({success: false, message: 'Error retrieving files', results: {}});          
+        });
     },
   },
 }
