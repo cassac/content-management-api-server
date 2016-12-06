@@ -12,7 +12,7 @@ module.exports = {
     } else {
       User.find({})
         .then(users => res.status(200).json({success: true, message: 'Users found.', results: users}))
-        .catch(err => res.status(500).json({success: false, message: 'Error retreiving users', results: err}))
+        .catch(err => res.status(500).json({success: false, message: 'Error retreiving users', results: []}))
     }
   },
   post: (req, res, next) => {
