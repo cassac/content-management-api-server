@@ -19,7 +19,7 @@ module.exports = {
           return res.status(200).json({success: true, message: 'User files retrieved.', results: files});
         })
         .catch(err => {
-            return res.status(500).json({success: false, message: `Error retrieving files ${err.message}`, results: []});
+            return res.status(500).json({success: false, message: `Error retrieving files ${err.message}.`, results: []});
         });
     }, // end userFiles GET
     post: (req, res, next) => {
@@ -52,7 +52,7 @@ module.exports = {
           .then(contents => {
             fsPath.writeFile(pathModule.join(config.uploadDir, filePath), contents, (err) => {
               if (err) {
-                return res.status(500).json({success: false, message: `Write file error: ${err.message}`, results: {}});
+                return res.status(500).json({success: false, message: `Write file error: ${err.message}.`, results: {}});
               }
               const userFile = new File({
                 ownerId: userId,
@@ -66,12 +66,12 @@ module.exports = {
                   return res.status(201).json({success: true, message: `File uploaded successfully.`, results: newFile});
                 })
                 .catch(err => {
-                  return res.status(500).json({success: false, message: `Save file error: ${err.message}`, results: {}});
+                  return res.status(500).json({success: false, message: `Save file error: ${err.message}.`, results: {}});
                 });
             });
           })
           .catch(err => {
-            return res.status(500).json({success: false, message: `File read error: ${err.message}`, results: {}});
+            return res.status(500).json({success: false, message: `File read error: ${err.message}.`, results: {}});
           });
       }); // end form.parse
     }, // end userFiles POST
@@ -84,38 +84,56 @@ module.exports = {
           if (!file) {
             return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`});
           }
-          if ((userId !== file.ownerId) && (!req.isAdmin)) {
-            return res.status(403).json({success: false, message: 'Forbidden', results: [] });
+          if (userId !== file.ownerId && !req.isAdmin) {
+            return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
           }
           return res.status(200).json({success: true, message: 'File found.', results: file});
         })
         .catch(err => {
-          return res.status(500).json({success: false, message: 'Error retrieving file', results: {}});
+          return res.status(500).json({success: false, message: 'Error retrieving file.', results: {}});
         });
     },
     put: (req, res, next) => {
       const { userId, fileId } = req.params;
       const { comment } = req.body;
-      File.findByIdAndUpdate(fileId, {comment})
+      File.findById(fileId)
         .then(file => {
           if (!file) {
             return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`});
           }
-          file = Object.assign(file, {comment});
-          return res.status(200).json({success: true, message: 'File updated.', results: file});
+          if (userId !== file.ownerId && !req.isAdmin) {
+            return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
+          }
+          file.comment = comment
+          file.save()
+            .then(() => {
+              return res.status(200).json({success: true, message: 'File updated.', results: file});
+            })
+            .catch(err => {
+              return res.status(500).json({success: false, message: 'Error updating file.', results: {}});
+            })            
         })
         .catch(err => {
-          return res.status(500).json({success: false, message: 'Error updating file', results: {}});
+          return res.status(500).json({success: false, message: 'Error retrieving file for update.', results: {}});
         })
     },
     delete: (req, res, next) => {
       const { userId, fileId } = req.params;
-      File.findByIdAndRemove(fileId)
-        .then(() => {
-          return res.status(200).json({success: true, message: 'File deleted.', results: {}});          
+      File.findById(fileId)
+        .then((file) => {
+          if (userId !== file.ownerId && !req.isAdmin) {
+            return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
+          }
+          file.remove()
+            .then(() => {
+              return res.status(200).json({success: true, message: 'File deleted.', results: {}});          
+            })
+            .catch(err => {
+              return res.status(500).json({success: false, message: 'Error deleting file.', results: {}});
+            });
         })
         .catch(err => {
-          return res.status(500).json({success: false, message: `Error deleting file. (ID: ${fileId})`, results: {}});          
+          return res.status(500).json({success: false, message: 'Error retrieving file for deletion.', results: {}});          
         })
     },    
   },
@@ -127,7 +145,7 @@ module.exports = {
           return res.status(200).json({success: true, message: 'Files retrieved.', results: files});
         })
         .catch(err => {
-          return res.status(500).json({success: false, message: 'Error retrieving files', results: {}});          
+          return res.status(500).json({success: false, message: 'Error retrieving files.', results: {}});          
         });
     },
   },
