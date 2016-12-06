@@ -1,7 +1,7 @@
 const path = require('path');
 
 module.exports = {
-  secretKey: 'this needs to be more secret',
+  secretKey: process.env.SECRET_KEY || 'this needs to be more secret',
   port: process.env.PORT || 3000,
   dbUri: process.env.TESTING ? 
     'mongodb://localhost:db/fileServer_testing' :
