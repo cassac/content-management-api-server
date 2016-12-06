@@ -13,6 +13,7 @@ module.exports = {
     if (!isAdmin) {
       return res.status(403).json({success: false, message: 'Forbidden', results: [] });
     }
+    req.isAdmin = isAdmin;
     return next();
   },
   requireUserOrAdmin: (req, res, next) => {
@@ -22,6 +23,7 @@ module.exports = {
     if (!requestingUser.isAdmin && (requestingUser.sub !== targetUser)) {
       return res.status(403).json({success: false, message: 'Forbidden', results: [] });
     }
+    req.isAdmin = requestingUser.isAdmin;
     return next();
   }
 }
