@@ -34,9 +34,13 @@ module.exports = {
         const contentType = file.headers['content-type'];
         const filePath = config.uploadPath(originalFilename);
         const fileExt = originalFilename.split('.').pop().toLowerCase();
-        // // File type must be in allowedFileTypes and must have an extension
+        // File type must be in allowedFileTypes and must have an extension
         if (!config.allowedFileTypes.includes(fileExt) || fileExt.length <= 1) {
           return res.json({success: false, message: `File type .${fileExt} not allowed.`, results: []})
+        }
+        if (size > config.maxFileSize) {
+          console.log(size, config.maxFileSize)
+          return res.json({success: false, message: `File size may not exceed ${config.maxFileSize / 100000} MB.`, results: []})
         }
         fs.readFileAsync(path, contents => contents)
           .then(contents => {
@@ -68,7 +72,17 @@ module.exports = {
   },
   singleFile: {
     get: (req, res, next) => {
-
+      const { fileId } = req.params;
+      File.findById(fileId)
+        .then(file => {
+          if (!file) {
+            return res.status(404).json({success: false, message: `File not found. (${fileId})`});
+          }
+          return res.status(200).json({success: true, message: 'File found.', results: file});
+        })
+        .catch(err => {
+          return res.status(500).json({success: false, message: 'Error retreiving file', results: []});
+        });
     },
     put: (req, res, next) => {
 
