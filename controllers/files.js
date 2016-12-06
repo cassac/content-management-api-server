@@ -78,11 +78,14 @@ module.exports = {
   },
   singleFile: {
     get: (req, res, next) => {
-      const { fileId } = req.params;
+      const { userId, fileId } = req.params;
       File.findById(fileId)
         .then(file => {
           if (!file) {
             return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`});
+          }
+          if ((userId !== file.ownerId) && (!req.isAdmin)) {
+            return res.status(403).json({success: false, message: 'Forbidden', results: [] });
           }
           return res.status(200).json({success: true, message: 'File found.', results: file});
         })
@@ -91,7 +94,7 @@ module.exports = {
         });
     },
     put: (req, res, next) => {
-      const { fileId } = req.params;
+      const { userId, fileId } = req.params;
       const { comment } = req.body;
       File.findByIdAndUpdate(fileId, {comment})
         .then(file => {
@@ -106,7 +109,7 @@ module.exports = {
         })
     },
     delete: (req, res, next) => {
-      const { fileId } = req.params;
+      const { userId, fileId } = req.params;
       File.findByIdAndRemove(fileId)
         .then(() => {
           return res.status(200).json({success: true, message: 'File deleted.', results: {}});          
