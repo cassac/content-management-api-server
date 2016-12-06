@@ -24,10 +24,9 @@ apiRouter.put('/users/:userId', userOrAdmin, UsersController.put);
 apiRouter.get('/users/:userId/files', userOrAdmin, FilesController.userFiles.get);
 // POSTing files need to use multiparty middleware instead of bodyParser
 apiRouter.post('/users/:userId/files', requireAuth, requireUserOrAdmin, FilesController.userFiles.post);
-
-apiRouter.get('/files/:fileId', userOrAdmin, FilesController.singleFile.get);
-apiRouter.put('/files/:fileId', userOrAdmin, FilesController.singleFile.put);
-apiRouter.delete('/files/:fileId', userOrAdmin, FilesController.singleFile.delete);
+apiRouter.get('/users/:userId/files/:fileId', userOrAdmin, FilesController.singleFile.get);
+apiRouter.put('/users/:userId/files/:fileId', userOrAdmin, FilesController.singleFile.put);
+apiRouter.delete('/users/:userId/files/:fileId', userOrAdmin, FilesController.singleFile.delete);
 apiRouter.get('/files', adminOnly, FilesController.allFiles.get);
 
 authRouter.post('/signin', jsonParser, AuthController.signin);

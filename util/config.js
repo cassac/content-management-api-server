@@ -27,4 +27,5 @@ module.exports = {
     'mp4', 'm4v', 'mov', 'wmv', 'avi', 'mpg', 'ogv',
     '3gp', '3g2',
   ],
+  maxFileSize: 50000000, // 50 MB
 }
