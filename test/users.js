@@ -15,13 +15,13 @@ const fakeUser2 = {username: 'user2', password: '123'};
 
 describe('User Model and API', () => {
 
-  before(done => {
+  before('Create fake users.', done => {
     User.create([fakeAdmin, fakeUser1, fakeUser2], () => {
       done();
     })   
-  });  
+  }); 
 
-  after(done => {    
+  after('Remove fake users.', done => {    
     User.remove({}, () => done() );  
   });
 
