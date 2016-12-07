@@ -62,4 +62,65 @@ describe('File Model and API', () => {
     console.log('testing 1, 2, 3...');
   });
 
+  // File Model
+    // Incomplete file fields
+    // Add file
+    // Check dates
+    // Update file comment
+    // Check dates
+    // Correct ownderId
+
+  // File API
+    // '/users/:userId/files' GET
+      // Auth
+        // Require auth and user or admin
+        // User can't requst other users files
+      // Successful request response
+        // Correct amount of files
+        // Returns users own files
+      // Unsuccesful request
+        // File not found
+    // '/users/:userId/files' POST
+      // Auth
+        // Require auth and user or admin
+        // User can't post files to other user accounts
+      // Successful post of file
+        // Path exists in DB
+        // Exists in directory
+        // Returns correct response
+      // Unsuccesful request
+        // File not found
+    // '/users/:userId/files/:fileId' GET
+      // Auth
+        // Require auth and user or admin
+        // User can't request other users files
+      // Successful request response
+        // Returns single file
+      // Unsuccesful request
+        // File not found
+    // '/users/:userId/files/:fileId' PUT
+      // Auth
+        // Require auth and user or admin
+        // User can't put other users files
+      // Successful request
+        // Changes reflected in db
+        // Returns updated instance
+      // Unsuccesful request
+        // File not found
+    // '/users/:userId/files/:fileId' DELETE
+      // Auth
+        // Require auth and user or admin
+        // User can't delete other users files
+      // Successful delete request
+        // Returns correct response
+        // Deleted from DB
+        // Removed from directory
+      // Unsuccesful request
+        // File not found
+    // '/files' GET
+      // Auth
+        // Require auth and admin only
+      // Successful request response
+        // Correct amount of files from all users
+
 });
