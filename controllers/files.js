@@ -104,7 +104,7 @@ module.exports = {
           if (userId !== file.ownerId && !req.isAdmin) {
             return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
           }
-          file.comment = comment
+          file.comment = comment;
           file.save()
             .then(() => {
               return res.status(200).json({success: true, message: 'File updated.', results: file});
