@@ -58,17 +58,28 @@ describe('File Model and API', () => {
     File.remove({}, () => done() );  
   });
 
-  it('Left off here', () => {
-    console.log('testing 1, 2, 3...');
-  });
-
-  // File Model
-    // Incomplete file fields
+  describe('File Model', () => {
+    
+    it('Should throw validation error if all requird fields not provided', (done) => {
+      const file = new File({
+        ownderId: user1._id,
+        // contentType: 'Required, but intentionally ignored for this test'.
+        filePath: '/path/to/file',
+        fileSize: 5000000,
+        comment: 'Comments are optional.'
+      });
+      file.save()
+        .catch((err) => {
+          assert.equal(err.name, 'ValidationError');
+          done();
+        });
+    })
     // Add file
     // Check dates
     // Update file comment
     // Check dates
     // Correct ownderId
+  });
 
   // File API
     // '/users/:userId/files' GET
@@ -89,6 +100,7 @@ describe('File Model and API', () => {
         // Exists in directory
         // Returns correct response
       // Unsuccesful request
+        // Incorrect file type
         // File not found
     // '/users/:userId/files/:fileId' GET
       // Auth
