@@ -117,6 +117,7 @@ describe('File Model and API', () => {
           .get(`/api/users/${user1._id}/files`)
           .set('authorization', user1Token)
           .end((err, res) => {
+            assert.equal(res.body.results[0].ownerId, user1._id);
             res.body.message.should.equal('User files retrieved.');
             res.status.should.equal(200);
             done();
@@ -139,18 +140,15 @@ describe('File Model and API', () => {
           .get(`/api/users/${user1._id}/files`)
           .set('authorization', adminToken)
           .end((err, res) => {
+            assert.lengthOf(res.body.results, 1);
             res.body.message.should.equal('User files retrieved.');
             res.status.should.equal(200);
             done();
           });
       });
 
-      // Successful request response
-        // Correct amount of files
-        // Returns users own files
-      // Unsuccesful request
-        // File not found
-    });
+    }); // end "/users/:userId/files" GET
+
     // '/users/:userId/files' POST
       // Auth
         // Require auth and user or admin
@@ -194,6 +192,7 @@ describe('File Model and API', () => {
         // Require auth and admin only
       // Successful request response
         // Correct amount of files from all users
+        
   }); // end File API
 
 });
