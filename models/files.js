@@ -13,3 +13,5 @@ const fileSchema = new Schema({
 const FileModel = mongoose.model('file', fileSchema);
 
 module.exports = FileModel;
+
+// TODO: Add created and modified date fields

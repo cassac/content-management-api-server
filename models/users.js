@@ -11,7 +11,7 @@ const userSchema = new Schema({
   firstName: String,
   lastName: String,
   companyName: String
-})
+});
 
 userSchema.pre('save', function(next) {
   const user = this;
@@ -39,3 +39,5 @@ userSchema.methods.comparePassword = function(providedPassword, cb) {
 const UserModel = mongoose.model('user', userSchema);
 
 module.exports = UserModel;
+
+// TODO: Add created and modified date fields
