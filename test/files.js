@@ -100,16 +100,35 @@ describe('File Model and API', () => {
 
   describe('File API', () => {
 
-    describe('"/users/:userId/files" GET', () => {
-
-      it('Unauthenticated user should be restricted', done => {
+    const testUnauthorized = (method, route, cb) => {
+      eval(`
         request(app)
-          .get(`/api/users/${user1._id}/files`)
+          .${method}('${route}')
           .end((err, res) => {
             res.text.should.equal('Unauthorized');
             res.status.should.equal(401);
-            done();
+            cb();
+        });
+      `);
+    }
+
+    const testForbidden = (method, route, cb) => {
+      eval(`
+        request(app)
+          .${method}('${route}')
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal('Forbidden.');
+            res.status.should.equal(403);
+            cb();
           });
+      `);
+    }
+
+    describe('"/users/:userId/files" GET', () => {
+
+      it('Unauthenticated user should be restricted', done => {
+        testUnauthorized('get', `/api/users/${user1._id}/files`, done);
       });
 
       it('Authenticated user should have access to own files', done => {
@@ -125,14 +144,7 @@ describe('File Model and API', () => {
       });
 
       it('Authenticated user should NOT have access to other user\'s files', done => {
-        request(app)
-          .get(`/api/users/${user2._id}/files`)
-          .set('authorization', user1Token)
-          .end((err, res) => {
-            res.body.message.should.equal('Forbidden.');
-            res.status.should.equal(403);
-            done();
-          });
+        testForbidden('get', `/api/users/${user2._id}/files`, done);
       });
 
       it('Authenticated admin should have access to any user\'s files', done => {
@@ -149,7 +161,8 @@ describe('File Model and API', () => {
 
     }); // end "/users/:userId/files" GET
 
-    // '/users/:userId/files' POST
+    describe('"/users/:userId/files" POST', () => {
+
       // Auth
         // Require auth and user or admin
         // User can't post files to other user accounts
@@ -160,6 +173,7 @@ describe('File Model and API', () => {
       // Unsuccesful request
         // Incorrect file type
         // File not found
+    });
     // '/users/:userId/files/:fileId' GET
       // Auth
         // Require auth and user or admin
@@ -192,7 +206,7 @@ describe('File Model and API', () => {
         // Require auth and admin only
       // Successful request response
         // Correct amount of files from all users
-        
+
   }); // end File API
 
 });
