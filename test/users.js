@@ -152,7 +152,7 @@ describe('User Model and API', () => {
           .set('authorization', userToken)
           .end((err, res) => {
             res.status.should.equal(403);
-            res.body.message.should.equal('Forbidden');
+            res.body.message.should.equal('Forbidden.');
             done();
           })
       });
@@ -164,7 +164,7 @@ describe('User Model and API', () => {
           .send({username: 'user3', password: '123'})
           .end((err, res) => {
             res.status.should.equal(403);
-            res.body.message.should.equal('Forbidden');
+            res.body.message.should.equal('Forbidden.');
             done();
           });
       });
@@ -175,7 +175,7 @@ describe('User Model and API', () => {
           .set('authorization', userToken)
           .end((err, res) => {
             res.status.should.equal(403);
-            res.body.message.should.equal('Forbidden');
+            res.body.message.should.equal('Forbidden.');
             done();
           });
       });
@@ -187,7 +187,7 @@ describe('User Model and API', () => {
           .send({username: 'newusername'})
           .end((err, res) => {
             res.status.should.equal(403);
-            res.body.message.should.equal('Forbidden');
+            res.body.message.should.equal('Forbidden.');
             done();
           });
       });
@@ -198,7 +198,7 @@ describe('User Model and API', () => {
           .set('authorization', userToken)
           .end((err, res) => {
             res.status.should.equal(403);
-            res.body.message.should.equal('Forbidden');
+            res.body.message.should.equal('Forbidden.');
             done();
           });
       });      
