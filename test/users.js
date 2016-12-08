@@ -237,6 +237,8 @@ describe('User Model and API', () => {
           .end((err, res) => {
             res.status.should.equal(200);
             res.body.results.username.should.equal('newusername');
+            // Updated user's updateAt field should update
+            assert.equal(res.body.results.updatedAt === user.createdAt, false)
             done();
           });
       });
