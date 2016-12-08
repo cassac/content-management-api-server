@@ -30,11 +30,11 @@ module.exports = {
   put: (req, res, next) => {
     const userId = req.params.userId;
     const userData = req.body;
+    const options = {new: true}; // Returns updated object
     if (userId) {
-      User.findByIdAndUpdate(userId, userData, (err, updatedUser) => {
+      User.findByIdAndUpdate(userId, userData, options, (err, updatedUser) => {
         if (err) return next(err);
         else if (updatedUser) {
-          updatedUser = Object.assign(updatedUser, userData);
           res.status(200).json({success: true, message: `User ${userId} updated.`, results: updatedUser});
         }
         else {
