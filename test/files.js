@@ -60,25 +60,44 @@ describe('File Model and API', () => {
 
   describe('File Model', () => {
     
-    it('Should throw validation error if all requird fields not provided', (done) => {
-      const file = new File({
-        ownderId: user1._id,
-        // contentType: 'Required, but intentionally ignored for this test'.
+    it('Should throw validation error if all requird fields not provided', done => {
+      const data = {
+        ownerId: user1._id,
+        // contentType: 'Required, but intentionally ignored for this test',
         filePath: '/path/to/file',
         fileSize: 5000000,
         comment: 'Comments are optional.'
-      });
+      };
+      const file = new File(data);
       file.save()
-        .catch((err) => {
+        .catch(err => {
           assert.equal(err.name, 'ValidationError');
           done();
         });
-    })
-    // Add file
+    });
+
+    it('Should successfully add file to database', done => {
+      const data = {
+        ownerId: user1._id,
+        contentType: 'application/pdf',
+        filePath: '/test/assets/test.pdf',
+        fileSize: 5000000,
+        comment: 'Comments are optional.'
+      }
+      const file = new File(data);
+      file.save()
+        .then(file => {
+          file.ownerId = data.ownerId;
+          file._id.should.exist;
+          done();
+        });
+    });
+
     // Check dates
     // Update file comment
     // Check dates
-    // Correct ownderId
+    // Correct ownerId
+
   });
 
   // File API
