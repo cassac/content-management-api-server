@@ -3,15 +3,20 @@ const Schema = mongoose.Schema;
 mongoose.Promise = require('bluebird');
 const bcrypt = require('bcrypt-nodejs');
 
-const userSchema = new Schema({
-  username: { type: String, unique: true, lowercase: true, required: true },
-  email: {type: String, trim: true, index: true, unique: true, sparse: true, lowercase: true},
-  password: { type: String, required: true, select: false  },
-  isAdmin: { type: Boolean, default: false, select: false },
-  firstName: String,
-  lastName: String,
-  companyName: String
-});
+const userSchema = new Schema(
+  {
+    username: { type: String, unique: true, lowercase: true, required: true },
+    email: {type: String, trim: true, index: true, unique: true, sparse: true, lowercase: true},
+    password: { type: String, required: true, select: false  },
+    isAdmin: { type: Boolean, default: false, select: false },
+    firstName: String,
+    lastName: String,
+    companyName: String
+  },
+  {
+    timestamps: true
+  }
+);
 
 userSchema.pre('save', function(next) {
   const user = this;
@@ -39,5 +44,3 @@ userSchema.methods.comparePassword = function(providedPassword, cb) {
 const UserModel = mongoose.model('user', userSchema);
 
 module.exports = UserModel;
-
-// TODO: Add created and modified date fields
