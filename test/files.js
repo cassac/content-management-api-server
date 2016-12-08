@@ -10,6 +10,7 @@ const app = require('../index');
 const User = require('../models/users');
 const File = require('../models/files');
 const util = require('../util/auth');
+const config = require('../util/config');
 
 const fakeAdmin = {username: 'admin', password: '123', isAdmin: true};
 const fakeUser1 = {username: 'user1', password: '123'};
@@ -131,6 +132,10 @@ describe('File Model and API', () => {
         testUnauthorized('get', `/api/users/${user1._id}/files`, done);
       });
 
+      it('Authenticated user should NOT have access to other user\'s files', done => {
+        testForbidden('get', `/api/users/${user2._id}/files`, done);
+      });
+
       it('Authenticated user should have access to own files', done => {
         request(app)
           .get(`/api/users/${user1._id}/files`)
@@ -141,10 +146,6 @@ describe('File Model and API', () => {
             res.status.should.equal(200);
             done();
           });
-      });
-
-      it('Authenticated user should NOT have access to other user\'s files', done => {
-        testForbidden('get', `/api/users/${user2._id}/files`, done);
       });
 
       it('Authenticated admin should have access to any user\'s files', done => {
@@ -161,19 +162,45 @@ describe('File Model and API', () => {
 
     }); // end "/users/:userId/files" GET
 
-    describe('"/users/:userId/files" POST', () => {
+    describe('"/users/:userId/files" POST', function() {
 
-      // Auth
-        // Require auth and user or admin
-        // User can't post files to other user accounts
-      // Successful post of file
-        // Path exists in DB
+      this.timeout(5000);
+
+      it('Unauthenticated user should be restricted', done => {
+        testUnauthorized('post', `/api/users/${user1._id}/files`, done);
+      });
+
+      it('Authenticated user should NOT be able to POST to other user\'s files', done => {
+        testForbidden('post', `/api/users/${user2._id}/files`, done);
+      });
+
+      it('Should successfully POST file to user\'s account', done => {
+        request(app)
+          .post(`/api/users/${user2._id}/files`)
+          .set('authorization', user2Token)
+          .attach('file', 'test/assets/test.png')
+          .field('comment', 'my test picture file.')
+          .end((err, res) => {
+            assert.equal(res.body.results.ownerId, user2._id);
+            assert.equal(res.body.filePath, config.uploadPath('test.png'));
+            res.body.message.should.equal('File uploaded successfully.');
+            res.body.results.contentType.should.equal('image/png');
+            res.body.results.comment.should.equal('my test picture file.');
+            res.status.should.equal(201);
+            done();
+          });
+      });
+
+      it('POSTed file should exist in directory', done => {
         // Exists in directory
-        // Returns correct response
+        done()
+      });
+
       // Unsuccesful request
         // Incorrect file type
         // File not found
     });
+
     // '/users/:userId/files/:fileId' GET
       // Auth
         // Require auth and user or admin
