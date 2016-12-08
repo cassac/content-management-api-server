@@ -40,7 +40,7 @@ describe('File Model and API', () => {
       })
       .then((users) => {
         user1 = users[1];
-        user2Token = util.grantUserToken(user1);
+        user1Token = util.grantUserToken(user1);
         return users;
       })
       .then((users) => {
@@ -96,22 +96,61 @@ describe('File Model and API', () => {
         });
     });
 
-    // Update file comment
-    // Check dates
-    // Correct ownerId
+  }); // end File Model
 
-  });
+  describe('File API', () => {
 
-  // File API
-    // '/users/:userId/files' GET
-      // Auth
-        // Require auth and user or admin
-        // User can't requst other users files
+    describe('"/users/:userId/files" GET', () => {
+
+      it('Unauthenticated user should be restricted', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files`)
+          .end((err, res) => {
+            res.text.should.equal('Unauthorized');
+            res.status.should.equal(401);
+            done();
+          });
+      });
+
+      it('Authenticated user should have access to own files', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files`)
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal('User files retrieved.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('Authenticated user should NOT have access to other user\'s files', done => {
+        request(app)
+          .get(`/api/users/${user2._id}/files`)
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal('Forbidden.');
+            res.status.should.equal(403);
+            done();
+          });
+      });
+
+      it('Authenticated admin should have access to any user\'s files', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files`)
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            res.body.message.should.equal('User files retrieved.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
       // Successful request response
         // Correct amount of files
         // Returns users own files
       // Unsuccesful request
         // File not found
+    });
     // '/users/:userId/files' POST
       // Auth
         // Require auth and user or admin
@@ -155,5 +194,6 @@ describe('File Model and API', () => {
         // Require auth and admin only
       // Successful request response
         // Correct amount of files from all users
+  }); // end File API
 
 });
