@@ -11,7 +11,7 @@ module.exports = {
   requireAdmin: (req, res, next) => {
     const { isAdmin } = jwt.decode(req.headers.authorization, secretKey);
     if (!isAdmin) {
-      return res.status(403).json({success: false, message: 'Forbidden', results: [] });
+      return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
     }
     req.isAdmin = isAdmin;
     return next();
@@ -21,7 +21,7 @@ module.exports = {
     const targetUser = req.params.userId;
     // Reject if requesting user is not an admin or requesting user is not target user
     if (!requestingUser.isAdmin && (requestingUser.sub !== targetUser)) {
-      return res.status(403).json({success: false, message: 'Forbidden', results: [] });
+      return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
     }
     req.isAdmin = requestingUser.isAdmin;
     return next();
