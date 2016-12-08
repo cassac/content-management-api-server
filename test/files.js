@@ -89,11 +89,13 @@ describe('File Model and API', () => {
         .then(file => {
           file.ownerId = data.ownerId;
           file._id.should.exist;
+          file.createdAt.should.exist;
+          file.updatedAt.should.exist;
+          assert.equal(file.createdAt, file.updatedAt);
           done();
         });
     });
 
-    // Check dates
     // Update file comment
     // Check dates
     // Correct ownerId
