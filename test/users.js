@@ -87,7 +87,7 @@ describe('User Model and API', () => {
 
     describe('Unauthenticated user access', () => {
 
-      it('"/user" GET should return 401 Unauthorized', (done) => {
+      it('/user GET should return 401 Unauthorized', (done) => {
         request(app)
           .get('/api/users')
           .end((err, res) => {
@@ -97,7 +97,7 @@ describe('User Model and API', () => {
           })
       });
 
-      it('"/user" POST should return 401 Unauthorized', (done) => {
+      it('/user POST should return 401 Unauthorized', (done) => {
         request(app)
           .post(`/api/users`, {
             username: 'user3',
@@ -110,7 +110,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" GET should return 401 Unauthorized', (done) => {
+      it('/user/:userId GET should return 401 Unauthorized', (done) => {
         request(app)
           .get(`/api/users/${targetUser1._id}`)
           .end((err, res) => {
@@ -120,7 +120,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" PUT should return 401 Unauthorized', (done) => {
+      it('/user/:userId PUT should return 401 Unauthorized', (done) => {
         request(app)
           .put(`/api/users/${targetUser1._id}`, {
             username: 'newusername'
@@ -132,7 +132,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" DELETE should return 401 Unauthorized', (done) => {
+      it('/user/:userId DELETE should return 401 Unauthorized', (done) => {
         request(app)
           .delete(`/api/users/${targetUser1._id}`)
           .end((err, res) => {
@@ -146,7 +146,7 @@ describe('User Model and API', () => {
 
     describe('Authenticated user - forbidden endpoints (admin only & other user assets)', () => {
 
-      it('"/user" GET should return 403 Forbidden', (done) => {
+      it('/user GET should return 403 Forbidden', (done) => {
         request(app)
           .get('/api/users')
           .set('authorization', userToken)
@@ -157,7 +157,7 @@ describe('User Model and API', () => {
           })
       });
 
-      it('"/user" POST should return 403 Forbidden', (done) => {
+      it('/user POST should return 403 Forbidden', (done) => {
         request(app)
           .post(`/api/users`)
           .set('authorization', userToken)
@@ -169,7 +169,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" GET should return 403 Forbidden', (done) => {
+      it('/user/:userId GET should return 403 Forbidden', (done) => {
         request(app)
           .get(`/api/users/${targetUser1._id}`)
           .set('authorization', userToken)
@@ -180,7 +180,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" PUT should return 403 Forbidden', (done) => {
+      it('/user/:userId PUT should return 403 Forbidden', (done) => {
         request(app)
           .put(`/api/users/${targetUser1._id}`)
           .set('authorization', userToken)
@@ -192,7 +192,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" DELETE should return 403 Forbidden', (done) => {
+      it('/user/:userId DELETE should return 403 Forbidden', (done) => {
         request(app)
           .delete(`/api/users/${targetUser1._id}`)
           .set('authorization', userToken)
@@ -207,7 +207,7 @@ describe('User Model and API', () => {
 
     describe('Authenticated user - allowed endpoints (access user\'s own assets)', () => {
      
-      it('"/user/:userId" GET should return 200 and user\'s own data', (done) => {
+      it('/user/:userId GET should return 200 and user\'s own data', (done) => {
         request(app)
           .get(`/api/users/${user._id}`)
           .set('authorization', userToken)
@@ -218,7 +218,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" GET should not return user password in response body', (done) => {
+      it('/user/:userId GET should not return user password in response body', (done) => {
         request(app)
           .get(`/api/users/${user._id}`)
           .set('authorization', userToken)
@@ -229,7 +229,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" PUT should return 200 and updated user data', (done) => {
+      it('/user/:userId PUT should return 200 and updated user data', (done) => {
         request(app)
           .put(`/api/users/${user._id}`)
           .set('authorization', userToken)
@@ -247,7 +247,7 @@ describe('User Model and API', () => {
 
     describe('Authenticated user - is admin (full access)', () => {
 
-      it('"/user" GET should return 3 users', (done) => {
+      it('/user GET should return 3 users', (done) => {
         request(app)
           .get('/api/users')
           .set('authorization', adminToken)
@@ -258,7 +258,7 @@ describe('User Model and API', () => {
           })
       });
 
-      it('"/user" POST should return 201 and new user data w/o password', (done) => {
+      it('/user POST should return 201 and new user data w/o password', (done) => {
         request(app)
           .post(`/api/users`)
           .set('authorization', adminToken)
@@ -272,7 +272,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" DELETE should return 204', (done) => {
+      it('/user/:userId DELETE should return 204', (done) => {
         request(app)
           .delete(`/api/users/${targetUser2._id}`)
           .set('authorization', adminToken)
@@ -282,7 +282,7 @@ describe('User Model and API', () => {
           });
       }); 
 
-      it('"/user/:userId" GET deleted user should return 404 "User not found." ', (done) => {
+      it('/user/:userId GET deleted user should return 404 "User not found. ', (done) => {
         request(app)
           .get(`/api/users/${targetUser2._id}`)
           .set('authorization', adminToken)
@@ -293,7 +293,7 @@ describe('User Model and API', () => {
           });
       });
 
-      it('"/user/:userId" PUT should return 200 and updated user data', (done) => {
+      it('/user/:userId PUT should return 200 and updated user data', (done) => {
         request(app)
           .put(`/api/users/${user._id}`)
           .set('authorization', adminToken)
@@ -311,7 +311,7 @@ describe('User Model and API', () => {
   
   describe('Auth API endpoints', () => {
 
-    describe('Signup endpoint "/auth/signup" POST', () => {
+    describe('Signup endpoint /auth/signup POST', () => {
 
       it('should require all user data', (done) => {
         request(app)
@@ -349,7 +349,7 @@ describe('User Model and API', () => {
 
     });
 
-    describe('Signin endpoint "/auth/signin" POST', () => {
+    describe('Signin endpoint /auth/signin POST', () => {
       
       it('should require username and password', (done) => {
         request(app)
