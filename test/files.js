@@ -412,11 +412,29 @@ describe('File Model and API', () => {
 
     }); // end /users/:userId/files/:fileId DELETE
 
-    // '/files' GET
-      // Auth
-        // Require auth and admin only
-      // Successful request response
-        // Correct amount of files from all users
+    describe('/files GET', () => {
+
+      it('Unauthenticated user should be restricted', done => {
+        testUnauthorized('get', '/api/files', done);
+      });
+
+      it('Authenticated user should NOT be able to GET files', done => {
+        testForbidden('get', '/api/files', done);
+      });
+
+      it('Authenticated admin should have access to all files', done => {
+        request(app)
+          .get('/api/files')
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            assert.lengthOf(res.body.results, 1);
+            res.body.message.should.equal('Files retrieved.');
+            res.status.should.equal(200);
+            done();
+          });
+      });  
+
+    }); // end /files GET
 
   }); // end File API
 
