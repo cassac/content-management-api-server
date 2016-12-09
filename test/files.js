@@ -25,7 +25,7 @@ describe('File Model and API', () => {
 
   let admin, adminToken;
   let user1, user1Token, user1File;
-  let user2, user2Token;
+  let user2, user2Token, user2File;
 
   before('Create fake users.', done => {
     User.create([fakeAdmin, fakeUser1, fakeUser2], () => {
@@ -82,7 +82,7 @@ describe('File Model and API', () => {
       const data = {
         ownerId: user1._id,
         contentType: 'application/pdf',
-        filePath: '/test/assets/test.pdf',
+        filePath: config.uploadPath('test.pdf'),
         fileSize: 5000000,
         comment: 'Comments are optional.'
       }
@@ -126,6 +126,19 @@ describe('File Model and API', () => {
             cb();
           });
       `);
+    }
+
+    const testInvalidFile = (method, route, cb) => {
+      eval(`
+        request(app)
+          .${method}('${route}')
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal('File not found. (ID: invalidFileId)');
+            res.status.should.equal(404);
+            cb();
+          });
+      `); 
     }
 
     describe('/users/:userId/files GET', () => {
@@ -181,6 +194,7 @@ describe('File Model and API', () => {
           .attach('file', 'test/assets/test.png')
           .field('comment', 'my test picture file.')
           .end((err, res) => {
+            user2File = res.body.results;
             assert.equal(res.body.results.ownerId, user2._id);
             assert.equal(res.body.results.filePath, config.uploadPath('test.png'));
             res.body.message.should.equal('File uploaded successfully.');
@@ -255,6 +269,10 @@ describe('File Model and API', () => {
         testForbidden('get', `/api/users/${user2._id}/files`, done);
       });
 
+      it('Should handle invalid file request', done => {
+        testInvalidFile('get', `/api/users/${user1._id}/files/invalidFileId`, done);
+      });
+
       it('Authenticated admin should have access to any user file', done => {
         request(app)
           .get(`/api/users/${user1._id}/files/${user1File._id}`)
@@ -277,16 +295,6 @@ describe('File Model and API', () => {
           });
       });
 
-      it('Should handle invalid file request', done => {
-        request(app)
-          .get(`/api/users/${user1._id}/files/invalidFileId`)
-          .set('authorization', user1Token)
-          .end((err, res) => {
-            res.body.message.should.equal('File not found. (ID: invalidFileId)');
-            res.status.should.equal(404);
-            done();
-          });
-      });
 
     }); // /users/:userId/files/:fileId GET  
 
@@ -298,6 +306,10 @@ describe('File Model and API', () => {
 
       it('Authenticated user should NOT be able to PUT other user\'s files', done => {
         testForbidden('put', `/api/users/${user2._id}/files/fakeFileId`, done);
+      });
+
+      it('Should handle invalid file request', done => {
+        testInvalidFile('put', `/api/users/${user1._id}/files/invalidFileId`, done);
       });
 
       it('User should be able to update file comment', done => {
@@ -328,32 +340,81 @@ describe('File Model and API', () => {
           });
       });
 
+    }); // /users/:userId/files/:fileId PUT
+
+    describe('/users/:userId/files/:fileId DELETE', () => {
+
+      it('Unauthenticated user should be restricted', done => {
+        testUnauthorized('delete', `/api/users/${user1._id}/files/fakeFileId`, done);
+      });
+
+      it('Authenticated user should NOT be able to DELETE other user\'s files', done => {
+        testForbidden('delete', `/api/users/${user2._id}/files/fakeFileId`, done);
+      });
+
       it('Should handle invalid file request', done => {
-        const data = {'comment': 'the user\'s 2nd new comment'};
+        testInvalidFile('delete', `/api/users/${user1._id}/files/invalidFileId`, done);
+      });
+
+      it('User should successfully DELETE own file', done => {
         request(app)
-          .put(`/api/users/${user1._id}/files/invalidFileId`)
+          .delete(`/api/users/${user1._id}/files/${user1File._id}`)
           .set('authorization', user1Token)
-          .send(data)
           .end((err, res) => {
-            res.body.message.should.equal('File not found. (ID: invalidFileId)');
+            res.body.message.should.equal('File deleted.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('Admin should successfully DELETE user\'s file', done => {
+        request(app)
+          .delete(`/api/users/${user2._id}/files/${user2File._id}`)
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            res.body.message.should.equal('File deleted.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('DELETEed file (user1) should not exist in database', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files/${user1File._id}`)
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal(`File not found. (ID: ${user1File._id})`);
             res.status.should.equal(404);
             done();
           });
       });
 
+      it('DELETEed file (user1) should not exist in database', done => {
+        request(app)
+          .get(`/api/users/${user2._id}/files/${user2File._id}`)
+          .set('authorization', user2Token)
+          .end((err, res) => {
+            res.body.message.should.equal(`File not found. (ID: ${user2File._id})`);
+            res.status.should.equal(404);
+            done();
+          });
+      });
 
-    });
+      // it('DELETEed files should not exist in directory', done => {
+      //   fs.stat(path.join(config.uploadDir, config.uploadPath('test.png')), (err, stats) => {
+      //     console.log('err:', err);
+      //     console.log(stats)
+      //     done()
+          // if (!err) throw Error('We expect to throw an error');
+          // fs.stat(path.join(config.uploadDir, config.uploadPath('test.pdf')), (err, stats) => {
+          //   if (err) throw err;
+          //   else done();
+          // });
+        // });
+      // });  
 
-    // '/users/:userId/files/:fileId' DELETE
-      // Auth
-        // Require auth and user or admin
-        // User can't delete other users files
-      // Successful delete request
-        // Returns correct response
-        // Deleted from DB
-        // Removed from directory
-      // Unsuccesful request
-        // File not found
+    }); // end /users/:userId/files/:fileId DELETE
+
     // '/files' GET
       // Auth
         // Require auth and admin only
