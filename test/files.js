@@ -5,6 +5,7 @@ const assert = chai.assert;
 const expect = chai.expect;  
 const should = chai.should();
 const path = require('path');
+const fs = require('fs');
 
 const app = require('../index');
 const User = require('../models/users');
@@ -164,8 +165,6 @@ describe('File Model and API', () => {
 
     describe('"/users/:userId/files" POST', function() {
 
-      this.timeout(5000);
-
       it('Unauthenticated user should be restricted', done => {
         testUnauthorized('post', `/api/users/${user1._id}/files`, done);
       });
@@ -182,7 +181,7 @@ describe('File Model and API', () => {
           .field('comment', 'my test picture file.')
           .end((err, res) => {
             assert.equal(res.body.results.ownerId, user2._id);
-            assert.equal(res.body.filePath, config.uploadPath('test.png'));
+            assert.equal(res.body.results.filePath, config.uploadPath('test.png'));
             res.body.message.should.equal('File uploaded successfully.');
             res.body.results.contentType.should.equal('image/png');
             res.body.results.comment.should.equal('my test picture file.');
@@ -192,8 +191,10 @@ describe('File Model and API', () => {
       });
 
       it('POSTed file should exist in directory', done => {
-        // Exists in directory
-        done()
+        fs.stat(path.join(config.uploadDir, config.uploadPath('test.png')), (err, stats) => {
+          if (err) throw err;
+          else done();
+        });
       });
 
       // Unsuccesful request
