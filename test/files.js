@@ -190,10 +190,30 @@ describe('File Model and API', () => {
           });
       });
 
-      it('POSTed file should exist in directory', done => {
+      it('Admin should successfully POST file to user\'s account', done => {
+        request(app)
+          .post(`/api/users/${user2._id}/files`)
+          .set('authorization', adminToken)
+          .attach('file', 'test/assets/test.pdf')
+          .field('comment', 'my test pdf file.')
+          .end((err, res) => {
+            assert.equal(res.body.results.ownerId, user2._id);
+            assert.equal(res.body.results.filePath, config.uploadPath('test.pdf'));
+            res.body.message.should.equal('File uploaded successfully.');
+            res.body.results.contentType.should.equal('application/pdf');
+            res.body.results.comment.should.equal('my test pdf file.');
+            res.status.should.equal(201);
+            done();
+          });
+      });
+
+      it('POSTed files should exist in directory', done => {
         fs.stat(path.join(config.uploadDir, config.uploadPath('test.png')), (err, stats) => {
           if (err) throw err;
-          else done();
+          fs.stat(path.join(config.uploadDir, config.uploadPath('test.pdf')), (err, stats) => {
+            if (err) throw err;
+            else done();
+          });
         });
       });
 
@@ -209,9 +229,19 @@ describe('File Model and API', () => {
           });
       });
 
-      // Unsuccesful request
-        // Incorrect file type
-        // File not found
+      it('Should reject POST request when invalid file type attached to request', done => {
+        request(app)
+          .post(`/api/users/${user2._id}/files`)
+          .set('authorization', user2Token)
+          .attach('file', 'test/assets/test.fail')
+          .field('comment', 'my fake file.')
+          .end((err, res) => {
+            res.body.message.should.equal('File type .fail not allowed.');
+            res.status.should.equal(400);
+            done();
+          });
+      });
+
     });
 
     // '/users/:userId/files/:fileId' GET
