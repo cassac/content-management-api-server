@@ -164,7 +164,7 @@ describe('File Model and API', () => {
 
     }); // end /users/:userId/files GET
 
-    describe('/users/:userId/files POST', function() {
+    describe('/users/:userId/files POST', () => {
 
       it('Unauthenticated user should be restricted', done => {
         testUnauthorized('post', `/api/users/${user1._id}/files`, done);
@@ -245,7 +245,7 @@ describe('File Model and API', () => {
 
     }); // end /users/:userId/files POST
 
-    describe('/users/:userId/files/:fileId GET', done => {
+    describe('/users/:userId/files/:fileId GET', () => {
 
       it('Unauthenticated user should be restricted', done => {
         testUnauthorized('get', `/api/users/${user1._id}/files`, done);
@@ -286,18 +286,64 @@ describe('File Model and API', () => {
             res.status.should.equal(404);
             done();
           });
-      }); // /users/:userId/files/:fileId GET
+      });
 
-    });    
-    // '/users/:userId/files/:fileId' PUT
-      // Auth
-        // Require auth and user or admin
-        // User can't put other users files
-      // Successful request
-        // Changes reflected in db
-        // Returns updated instance
-      // Unsuccesful request
-        // File not found
+    }); // /users/:userId/files/:fileId GET  
+
+    describe('/users/:userId/files/:fileId PUT', () => {
+     
+      it('Unauthenticated user should be restricted', done => {
+        testUnauthorized('put', `/api/users/${user1._id}/files/fakeFileId`, done);
+      });
+
+      it('Authenticated user should NOT be able to PUT other user\'s files', done => {
+        testForbidden('put', `/api/users/${user2._id}/files/fakeFileId`, done);
+      });
+
+      it('User should be able to update file comment', done => {
+        const data = {'comment': 'the user\'s new comment'};
+        request(app)
+          .put(`/api/users/${user1._id}/files/${user1File._id}`)
+          .set('authorization', user1Token)
+          .send(data)
+          .end((err, res) => {
+            res.body.results.comment.should.equal(data.comment);
+            res.body.message.should.equal('File updated.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('Admin should be able to update user\'s file comment', done => {
+        const data = {'comment': 'the admin\'s new comment'};
+        request(app)
+          .put(`/api/users/${user1._id}/files/${user1File._id}`)
+          .set('authorization', adminToken)
+          .send(data)
+          .end((err, res) => {
+            res.body.results.comment.should.equal(data.comment);
+            res.body.message.should.equal('File updated.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('Should handle invalid file request', done => {
+        const data = {'comment': 'the user\'s 2nd new comment'};
+        request(app)
+          .put(`/api/users/${user1._id}/files/invalidFileId`)
+          .set('authorization', user1Token)
+          .send(data)
+          .end((err, res) => {
+            res.body.message.should.equal('File not found. (ID: invalidFileId)');
+            res.status.should.equal(404);
+            done();
+          });
+      });
+
+
+    });
+
     // '/users/:userId/files/:fileId' DELETE
       // Auth
         // Require auth and user or admin
