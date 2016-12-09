@@ -43,10 +43,10 @@ module.exports = {
         const fileExt = originalFilename.split('.').pop().toLowerCase();
         // File type must be in allowedFileTypes and must have an extension
         if (!config.allowedFileTypes.includes(fileExt) || fileExt.length <= 1) {
-          return res.json({success: false, message: `File type .${fileExt} not allowed.`, results: {}});
+          return res.status(400).json({success: false, message: `File type .${fileExt} not allowed.`, results: {}});
         }
         if (size > config.maxFileSize) {
-          return res.json({success: false, message: `File size may not exceed ${config.maxFileSize / 100000} MB.`, results: {}});
+          return res.status(400).json({success: false, message: `File size may not exceed ${config.maxFileSize / 100000} MB.`, results: {}});
         }
         fs.readFileAsync(path, contents => contents)
           .then(contents => {

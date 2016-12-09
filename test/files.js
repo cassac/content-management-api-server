@@ -173,7 +173,7 @@ describe('File Model and API', () => {
         testForbidden('post', `/api/users/${user2._id}/files`, done);
       });
 
-      it('Should successfully POST file to user\'s account', done => {
+      it('User should successfully POST file to user\'s account', done => {
         request(app)
           .post(`/api/users/${user2._id}/files`)
           .set('authorization', user2Token)
@@ -195,6 +195,18 @@ describe('File Model and API', () => {
           if (err) throw err;
           else done();
         });
+      });
+
+      it('Should reject POST request when no file attached to request', done => {
+        request(app)
+          .post(`/api/users/${user2._id}/files`)
+          .set('authorization', user2Token)
+          .field('comment', 'my test picture file.')
+          .end((err, res) => {
+            res.body.message.should.equal('Comment and file field required in request.');
+            res.status.should.equal(400);
+            done();
+          });
       });
 
       // Unsuccesful request
