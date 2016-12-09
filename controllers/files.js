@@ -132,14 +132,22 @@ module.exports = {
           }
           file.remove()
             .then(() => {
-              return res.status(200).json({success: true, message: 'File deleted.', results: {}});          
+              fs.unlink(pathModule.join(config.uploadDir, file.filePath), err => {
+                if (err) {
+                  return res.status(500).json({success: false, message: `Error deleting file. (ID: ${fileId})`, results: {}});                  
+                }
+                return res.status(200).json({success: true, message: 'File deleted.', results: {}});          
+              });
             })
             .catch(err => {
-              return res.status(500).json({success: false, message: 'Error deleting file.', results: {}});
+              return res.status(500).json({success: false, message: `Error deleting file. (ID: ${fileId})`, results: {}});
             });
         })
         .catch(err => {
-          return res.status(500).json({success: false, message: 'Error retrieving file for deletion.', results: {}});          
+          if (err.name === 'CastError') {
+            return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`, results: {}});  
+          }
+          return res.status(500).json({success: false, message: `Error retrieving file for deletion. (ID: ${fileId})`, results: {}});          
         })
     },    
   },
