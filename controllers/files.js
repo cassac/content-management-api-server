@@ -117,6 +117,9 @@ module.exports = {
             })            
         })
         .catch(err => {
+          if (err.name === 'CastError') {
+            return res.status(404).json({success: false, message: `File not found. (ID: ${fileId})`, results: {}});  
+          }
           return res.status(500).json({success: false, message: 'Error retrieving file for update.', results: {}});
         })
     },
