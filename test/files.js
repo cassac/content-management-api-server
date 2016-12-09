@@ -389,7 +389,7 @@ describe('File Model and API', () => {
           });
       });
 
-      it('DELETEed file (user1) should not exist in database', done => {
+      it('DELETEed file (user2) should not exist in database', done => {
         request(app)
           .get(`/api/users/${user2._id}/files/${user2File._id}`)
           .set('authorization', user2Token)
@@ -400,18 +400,15 @@ describe('File Model and API', () => {
           });
       });
 
-      // it('DELETEed files should not exist in directory', done => {
-      //   fs.stat(path.join(config.uploadDir, config.uploadPath('test.png')), (err, stats) => {
-      //     console.log('err:', err);
-      //     console.log(stats)
-      //     done()
-          // if (!err) throw Error('We expect to throw an error');
-          // fs.stat(path.join(config.uploadDir, config.uploadPath('test.pdf')), (err, stats) => {
-          //   if (err) throw err;
-          //   else done();
-          // });
-        // });
-      // });  
+      it('DELETEed files should not exist in directory', done => {
+        fs.stat(path.join(config.uploadDir, config.uploadPath('test.png')), (err, stats) => {
+          err.code.should.equal('ENOENT');    
+          fs.stat(path.join(config.uploadDir, config.uploadPath('test.pdf')), (err, stats) => {
+            err.code.should.equal('ENOENT');            
+            done();
+          });
+        });
+      });  
 
     }); // end /users/:userId/files/:fileId DELETE
 
