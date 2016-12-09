@@ -16,7 +16,7 @@ module.exports = {
           if (!files) {
             return res.status(200).json({success: true, message: 'User has no files.', results: []});
           }
-          return res.status(200).json({success: true, message: 'User files retrieved.', results: files});
+          return res.status(200).json({success: true, message: 'Files retrieved.', results: files});
         })
         .catch(err => {
             return res.status(500).json({success: false, message: `Error retrieving files ${err.message}.`, results: []});
@@ -87,7 +87,7 @@ module.exports = {
           if (userId !== file.ownerId && !req.isAdmin) {
             return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
           }
-          return res.status(200).json({success: true, message: 'File found.', results: file});
+          return res.status(200).json({success: true, message: 'File retrieved.', results: file});
         })
         .catch(err => {
           return res.status(500).json({success: false, message: 'Error retrieving file.', results: {}});
