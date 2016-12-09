@@ -24,7 +24,7 @@ const fakeFile3 = {file: path.join(__dirname, 'assets', 'test.fail'), comment: '
 describe('File Model and API', () => {
 
   let admin, adminToken;
-  let user1, user1Token;
+  let user1, user1Token, user1File;
   let user2, user2Token;
 
   before('Create fake users.', done => {
@@ -89,6 +89,7 @@ describe('File Model and API', () => {
       const file = new File(data);
       file.save()
         .then(file => {
+          user1File = file;
           file.ownerId = data.ownerId;
           file._id.should.exist;
           file.createdAt.should.exist;
@@ -127,7 +128,7 @@ describe('File Model and API', () => {
       `);
     }
 
-    describe('"/users/:userId/files" GET', () => {
+    describe('/users/:userId/files GET', () => {
 
       it('Unauthenticated user should be restricted', done => {
         testUnauthorized('get', `/api/users/${user1._id}/files`, done);
@@ -143,7 +144,7 @@ describe('File Model and API', () => {
           .set('authorization', user1Token)
           .end((err, res) => {
             assert.equal(res.body.results[0].ownerId, user1._id);
-            res.body.message.should.equal('User files retrieved.');
+            res.body.message.should.equal('Files retrieved.');
             res.status.should.equal(200);
             done();
           });
@@ -155,15 +156,15 @@ describe('File Model and API', () => {
           .set('authorization', adminToken)
           .end((err, res) => {
             assert.lengthOf(res.body.results, 1);
-            res.body.message.should.equal('User files retrieved.');
+            res.body.message.should.equal('Files retrieved.');
             res.status.should.equal(200);
             done();
           });
       });
 
-    }); // end "/users/:userId/files" GET
+    }); // end /users/:userId/files GET
 
-    describe('"/users/:userId/files" POST', function() {
+    describe('/users/:userId/files POST', function() {
 
       it('Unauthenticated user should be restricted', done => {
         testUnauthorized('post', `/api/users/${user1._id}/files`, done);
@@ -242,16 +243,52 @@ describe('File Model and API', () => {
           });
       });
 
-    });
+    }); // end /users/:userId/files POST
 
-    // '/users/:userId/files/:fileId' GET
-      // Auth
-        // Require auth and user or admin
-        // User can't request other users files
-      // Successful request response
-        // Returns single file
-      // Unsuccesful request
-        // File not found
+    describe('/users/:userId/files/:fileId GET', done => {
+
+      it('Unauthenticated user should be restricted', done => {
+        testUnauthorized('get', `/api/users/${user1._id}/files`, done);
+      });
+
+      it('Authenticated user should NOT be able to GET other user\'s files', done => {
+        testForbidden('get', `/api/users/${user2._id}/files`, done);
+      });
+
+      it('Authenticated admin should have access to any user file', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files/${user1File._id}`)
+          .set('authorization', adminToken)
+          .end((err, res) => {
+            res.body.message.should.equal('File retrieved.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('Authenticated user should have access to own file', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files/${user1File._id}`)
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal('File retrieved.');
+            res.status.should.equal(200);
+            done();
+          });
+      });
+
+      it('Should handle invalid file request', done => {
+        request(app)
+          .get(`/api/users/${user1._id}/files/invalidFileId`)
+          .set('authorization', user1Token)
+          .end((err, res) => {
+            res.body.message.should.equal('File not found. (ID: invalidFileId)');
+            res.status.should.equal(404);
+            done();
+          });
+      }); // /users/:userId/files/:fileId GET
+
+    });    
     // '/users/:userId/files/:fileId' PUT
       // Auth
         // Require auth and user or admin
