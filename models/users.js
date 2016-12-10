@@ -11,10 +11,10 @@ const userSchema = new Schema(
     isAdmin: { type: Boolean, default: false, select: false },
     firstName: String,
     lastName: String,
-    companyName: String
+    companyName: String,
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 

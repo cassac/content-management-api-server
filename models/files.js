@@ -11,7 +11,7 @@ const fileSchema = new Schema(
     comment: String,
   },
   {
-    timestamps: true
+    timestamps: true,
   }
 );
 
