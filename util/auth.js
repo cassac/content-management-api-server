@@ -25,5 +25,11 @@ module.exports = {
     }
     req.isAdmin = requestingUser.isAdmin;
     return next();
-  }
+  },
+  isAuthenticated: (req, res, next) => {
+    const user = jwt.decode(req.headers.authorization, secretKey);
+    if (!user) req.isAuthenticated = false;
+    else req.isAuthenticated = true;
+    return next();
+  },
 }
