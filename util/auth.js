@@ -27,9 +27,11 @@ module.exports = {
     return next();
   },
   isAuthenticated: (req, res, next) => {
-    const user = jwt.decode(req.headers.authorization, secretKey);
-    if (!user) req.isAuthenticated = false;
-    else req.isAuthenticated = true;
+    let user;
+    const { authorization } = req.headers;
+    if (authorization) user = jwt.decode(authorization, secretKey);
+    if (user) req.isAuthenticated = true;
+    else req.isAuthenticated = false;
     return next();
   },
 }
