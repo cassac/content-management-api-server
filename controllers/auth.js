@@ -43,12 +43,12 @@ module.exports = {
     User.findOne({username}).select('+password +isAdmin').exec()
       .then(user => {
         if (!user) {
-          return res.status(404).json({success: false, message: 'User not found.', results: [] });
+          return res.status(404).json({success: false, message: 'Incorrect username and/or password', results: [] });
         }
         user.comparePassword(password, function(err, isMatch) {
           if (err) return err;
           if (!isMatch) {
-            return res.status(400).json({success: false, message: 'Incorrect username and/or password', results: [] });
+            return res.status(404).json({success: false, message: 'Incorrect username and/or password', results: [] });
           }
           const token = util.grantUserToken(user);
           return res.status(200).json({token, success: true, message: 'Successful login.', results: []})
