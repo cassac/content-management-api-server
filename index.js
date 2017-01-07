@@ -9,11 +9,15 @@ const app = express();
 
 mongoose.connect(config.dbUri);
 
-app.use(express.static(path.join(__dirname, '../client/public')));
+app.set('views', __dirname + '/views');
+app.set('view engine', 'ejs');
+
+app.use('/build', express.static(path.join(__dirname, '../client/public')));
 app.use('/api', router.apiRouter);
 app.use('/auth', router.authRouter);
+app.use('/', router.staticRouter);
 
-app.get('*', (req, res) => {
+app.get('/dashboard*', (req, res) => {
   res.sendFile(path.join(__dirname, '../client/public/index.html'));
 });
 
