@@ -19,7 +19,7 @@ module.exports = {
     const user = new User(req.body);
     if (user) {
       user.save(err => {
-        if (err) return next(err);
+        if (err) return res.status(400).json({success: false, message: 'Must provide required fields.'});
         res.status(201).json({success: true, message: 'User created.', results: user});
       });
     }
