@@ -33,16 +33,19 @@ module.exports = {
     const options = {new: true}; // Returns updated object
     if (userId) {
       User.findByIdAndUpdate(userId, userData, options, (err, updatedUser) => {
-        if (err) return next(err);
+        if (err) {
+          console.log('error:', err)
+          return res.status(201).json({success: false, message: 'Username already registered.', results: [] });            
+        }
         else if (updatedUser) {
-          res.status(200).json({success: true, message: `User ${userId} updated.`, results: updatedUser});
+          return res.status(200).json({success: true, message: `User ${userId} updated.`, results: updatedUser});
         }
         else {
-          res.status(404).json({success: false, message: `User ${userId} not found.`});
+          return res.status(404).json({success: false, message: `User ${userId} not found.`});
         }
       })
     } else {
-      res.status(400).json({success: false, message: 'Must provide user id.'});
+      return res.status(400).json({success: false, message: 'Must provide user id.'});
     }    
   },
   delete: (req, res, next) => {
@@ -51,7 +54,7 @@ module.exports = {
       User.findByIdAndRemove(userId, (err, deletedUser) => {
         if (err) return next(user);
         else if (deletedUser) {
-          res.status(204).json({success: true, message: `User: ${userId} deleted.`});
+          res.status(200).json({success: true, message: `User: ${userId} deleted.`});
         }
         else {
           res.status(404).json({success: false, message: `User ${userId} not found.`});
