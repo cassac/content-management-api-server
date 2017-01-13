@@ -18,20 +18,31 @@ const userSchema = new Schema(
   }
 );
 
-userSchema.pre('save', function(next) {
-  const user = this;
+
+const generateHash = function(user, cb) {
 
   bcrypt.genSalt(10, function(err, salt) {
     if (err) { return next(err); }
 
     bcrypt.hash(user.password, salt, null, function(err, hash) {
-      if (err) { return next(err); }
+      if (err) return cb(err);
       user.password = hash;
-      next();
+      return cb();
     });
     
   });
 
+}
+
+userSchema.pre('save', function(next) {
+  const user = this;
+  generateHash(user, next);
+});
+
+userSchema.pre('findOneAndUpdate', function(next) {
+  const user = this._update;
+  if (!user.password) return next();
+  generateHash(user, next);
 });
 
 userSchema.methods.comparePassword = function(providedPassword, cb) {
