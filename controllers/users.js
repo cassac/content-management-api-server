@@ -10,7 +10,7 @@ module.exports = {
         else res.status(404).json({success: false, message: 'User not found.'})
       })
     } else {
-      User.find({})
+      User.find({}).select('+isAdmin').exec()
         .then(users => res.status(200).json({success: true, message: 'Users found.', results: users}))
         .catch(err => res.status(500).json({success: false, message: 'Error retreiving users', results: []}))
     }
@@ -34,7 +34,6 @@ module.exports = {
     if (userId) {
       User.findByIdAndUpdate(userId, userData, options, (err, updatedUser) => {
         if (err) {
-          console.log('error:', err)
           return res.status(201).json({success: false, message: 'Username already registered.', results: [] });            
         }
         else if (updatedUser) {
