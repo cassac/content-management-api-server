@@ -51,7 +51,7 @@ module.exports = {
             return res.status(404).json({success: false, message: 'Incorrect username and/or password', results: [] });
           }
           const token = util.grantUserToken(user);
-          return res.status(200).json({token, success: true, message: 'Successful login.', results: []})
+          return res.status(200).json({token, success: true, message: 'Successful login.', results: user })
         });
       })
       .catch(err => {
