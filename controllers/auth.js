@@ -1,5 +1,5 @@
 const User = require('../models/users');
-const util = require('../util/auth');
+const auth = require('../util/auth');
 
 module.exports = {
   signup: (req, res, next) => {
@@ -11,12 +11,9 @@ module.exports = {
             const user = new User(req.body);
             user.save()
               .then(user => {
-                const token = util.grantUserToken(user);
+                const token = auth.grantUserToken(user);
                 // Remove sensitive information before sending to client
-                user = user.toObject();
-                delete user.password;
-                delete user.isAdmin;
-                const data = {token, success: true, message: 'User created.', results: user};
+                const data = {token, success: true, message: 'User created.', results: auth.removeHash(user)};
                 return res.status(201).json(data);
               })
               .catch(err => {
@@ -43,15 +40,15 @@ module.exports = {
     User.findOne({username}).select('+password +isAdmin').exec()
       .then(user => {
         if (!user) {
-          return res.status(404).json({success: false, message: 'Incorrect username and/or password', results: [] });
+          return res.status(401).json({success: false, message: 'Incorrect username and/or password', results: [] });
         }
         user.comparePassword(password, function(err, isMatch) {
           if (err) return err;
           if (!isMatch) {
-            return res.status(404).json({success: false, message: 'Incorrect username and/or password', results: [] });
+            return res.status(401).json({success: false, message: 'Incorrect username and/or password', results: [] });
           }
-          const token = util.grantUserToken(user);
-          return res.status(200).json({token, success: true, message: 'Successful login.', results: user })
+          const token = auth.grantUserToken(user);
+          return res.status(200).json({token, success: true, message: 'Successful login.', results: auth.removeHash(user) })
         });
       })
       .catch(err => {
