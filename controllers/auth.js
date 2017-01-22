@@ -43,7 +43,9 @@ module.exports = {
           return res.status(401).json({success: false, message: 'Incorrect username and/or password', results: [] });
         }
         user.comparePassword(password, function(err, isMatch) {
-          if (err) return err;
+          if (err) {
+            return res.status(401).json({success: false, message: 'Incorrect username and/or password', results: [] });
+          }
           if (!isMatch) {
             return res.status(401).json({success: false, message: 'Incorrect username and/or password', results: [] });
           }
