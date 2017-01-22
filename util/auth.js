@@ -34,4 +34,9 @@ module.exports = {
     else req.isAuthenticated = false;
     return next();
   },
+  removeHash: (userObject) => {
+    user = userObject.toObject();
+    delete user.password;
+    return user;
+  }
 }
