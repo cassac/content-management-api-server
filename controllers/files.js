@@ -87,7 +87,9 @@ module.exports = {
           if (userId !== file.ownerId && !req.isAdmin) {
             return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
           }
-          return res.status(200).json({success: true, message: 'File retrieved.', results: file});
+          const filepath = pathModule.join(config.uploadDir, file.filePath)
+          return res.sendFile(filepath);
+          // return res.status(200).json({success: true, message: 'File retrieved.', results: file});
         })
         .catch(err => {
           if (err.name === 'CastError') {
