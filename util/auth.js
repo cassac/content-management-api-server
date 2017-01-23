@@ -17,7 +17,8 @@ module.exports = {
     return next();
   },
   requireUserOrAdmin: (req, res, next) => {
-    const requestingUser = jwt.decode(req.headers.authorization, secretKey);
+    // token may be in query parameter if a get request for a file
+    const requestingUser = jwt.decode(req.headers.authorization || req.query.token, secretKey);
     const targetUser = req.params.userId;
     // Reject if requesting user is not an admin or requesting user is not target user
     if (!requestingUser.isAdmin && (requestingUser.sub !== targetUser)) {
