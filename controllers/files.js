@@ -88,8 +88,7 @@ module.exports = {
             return res.status(403).json({success: false, message: 'Forbidden.', results: [] });
           }
           const filepath = pathModule.join(config.uploadDir, file.filePath)
-          return res.sendFile(filepath);
-          // return res.status(200).json({success: true, message: 'File retrieved.', results: file});
+          return res.download(filepath);
         })
         .catch(err => {
           if (err.name === 'CastError') {
